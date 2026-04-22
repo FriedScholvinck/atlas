@@ -1,0 +1,505 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>mac-cleanup skill — atlas</title>
+<meta name="description" content="Drop-in Markdown skill that teaches Claude Code, Cursor, or any skill-aware coding agent how to use the atlas CLI to audit and clean up your Mac — all locally." />
+<meta property="og:title" content="mac-cleanup skill — atlas" />
+<meta property="og:description" content="One file. One prompt. Your coding agent audits your Mac." />
+<meta property="og:type" content="article" />
+<meta property="og:url" content="https://friedscholvinck.github.io/atlas/skills/mac-cleanup.html" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%235ee2e8' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%235ee2e8'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --surface: #111317;
+    --surface-2: #161a1f;
+    --border: #1e2227;
+    --text: #e6e9ec;
+    --text-dim: #9aa1a9;
+    --text-muted: #5c636b;
+    --accent: #5ee2e8;
+    --accent-dim: #2a9ca1;
+    --accent-bg: rgba(94, 226, 232, 0.08);
+    --warn: #f0c674;
+    --bad: #e06c75;
+    --good: #98c379;
+    --radius: 14px;
+    --radius-lg: 20px;
+  }
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0; padding: 0;
+    background: var(--bg); color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: 16px; line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+  }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(94,226,232,0.07), transparent 60%),
+      var(--bg);
+  }
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: #fff; }
+  .wrap { max-width: 960px; margin: 0 auto; padding: 0 24px; }
+
+  nav {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 24px 0;
+  }
+  .brand {
+    display: flex; align-items: center; gap: 10px;
+    font-weight: 500; font-size: 15px; letter-spacing: -0.01em;
+  }
+  .brand-dot {
+    width: 10px; height: 10px; border-radius: 50%;
+    background: var(--accent); box-shadow: 0 0 12px rgba(94,226,232,0.5);
+  }
+  nav .links { display: flex; gap: 24px; font-size: 14px; color: var(--text-dim); }
+  nav .links a { color: var(--text-dim); }
+  nav .links a:hover { color: var(--text); }
+
+  header.hero { padding: 56px 0 20px; }
+  .eyebrow {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid rgba(94,226,232,0.2);
+    border-radius: 999px;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+  }
+  h1 {
+    margin: 0 0 16px;
+    font-size: clamp(30px, 5vw, 46px);
+    line-height: 1.1; letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  h1 .accent { color: var(--accent); }
+  p.lead {
+    margin: 0 0 28px;
+    font-size: clamp(15px, 1.7vw, 18px);
+    color: var(--text-dim);
+    max-width: 680px;
+  }
+
+  .actions {
+    display: flex; flex-wrap: wrap; gap: 10px; align-items: center;
+    margin-bottom: 14px;
+  }
+  .btn {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 11px 18px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px; font-weight: 500; font-family: inherit;
+    cursor: pointer;
+    transition: background 120ms, border-color 120ms, color 120ms;
+  }
+  .btn:hover { background: var(--surface-2); border-color: #2c3036; }
+  .btn.primary {
+    background: var(--accent); color: #0a0b0d; border-color: var(--accent);
+  }
+  .btn.primary:hover { background: #8bf0f4; border-color: #8bf0f4; color: #0a0b0d; }
+  .btn.copied { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+  .btn.primary.copied { background: #8bf0f4; color: #0a0b0d; border-color: #8bf0f4; }
+
+  .hint { color: var(--text-muted); font-size: 13px; margin: 4px 0 32px; }
+  .hint code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px; padding: 1px 6px; border-radius: 5px;
+    background: var(--surface); color: var(--accent);
+    border: 1px solid var(--border);
+  }
+
+  section { padding: 18px 0 6px; }
+  h2 {
+    margin: 36px 0 10px;
+    font-size: 20px; font-weight: 600; letter-spacing: -0.01em;
+  }
+  .row-lede { color: var(--text-dim); margin: 0 0 12px; font-size: 14px; }
+
+  .codebox {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #0c0e11;
+    padding: 18px 18px 16px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px; line-height: 1.6;
+    color: var(--text);
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 420px;
+    overflow: auto;
+  }
+  .codebox.tight { max-height: none; }
+  .codebox .prompt { color: var(--text-muted); user-select: none; }
+
+  .skill-preview {
+    margin-top: 12px;
+    max-height: 540px;
+    overflow: auto;
+    white-space: pre;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: var(--text-dim);
+    background: #0c0e11;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px 20px;
+    tab-size: 2;
+  }
+
+  .url-block {
+    display: flex; align-items: center; gap: 8px;
+    padding: 12px 14px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: var(--surface);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    color: var(--text);
+    overflow: auto;
+    white-space: nowrap;
+  }
+  .url-block .ghost { color: var(--text-muted); }
+  .url-block .copy-inline {
+    margin-left: auto;
+    padding: 3px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    font-family: inherit;
+    cursor: pointer;
+  }
+  .url-block .copy-inline:hover { color: var(--text); border-color: #2c3036; }
+  .url-block .copy-inline.copied { color: var(--accent); border-color: var(--accent); }
+
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 56px; padding: 28px 0 60px;
+    color: var(--text-muted); font-size: 13px;
+    display: flex; justify-content: space-between; flex-wrap: wrap; gap: 14px;
+  }
+  footer a { color: var(--text-dim); }
+  footer a:hover { color: var(--text); }
+
+  ::selection { background: rgba(94,226,232,0.25); color: var(--text); }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <nav>
+    <a href="../" class="brand" style="color:var(--text)">
+      <span class="brand-dot"></span>
+      <span>atlas</span>
+    </a>
+    <div class="links">
+      <a href="../#install">install</a>
+      <a href="../#docs">docs</a>
+      <a href="https://github.com/FriedScholvinck/agent-skill" style="display:none"></a>
+      <a href="https://github.com/FriedScholvinck/atlas" target="_blank" rel="noopener">github</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow">agent skill · drop-in Markdown</span>
+    <h1><span class="accent">mac-cleanup</span> — teach your agent to audit your Mac.</h1>
+    <p class="lead">
+      A single self-contained Markdown skill for Claude Code, Cursor, or any skill-aware coding agent. Paste one prompt and your agent fetches the skill, checks the <code style="font-family:inherit;color:var(--accent)">atlas</code> CLI is installed, and starts walking you through what to uninstall — all locally, nothing leaves your machine.
+    </p>
+
+    <div class="actions">
+      <button class="btn primary" id="copy-prompt">
+        <span>⎘</span> Copy install prompt
+      </button>
+      <button class="btn" id="copy-skill">
+        <span>⎘</span> Copy skill file
+      </button>
+      <a class="btn" href="./mac-cleanup.md" target="_blank" rel="noopener">
+        <span>↗</span> Raw .md
+      </a>
+    </div>
+    <p class="hint">Paste the install prompt into a fresh chat with your coding agent. It does the rest.</p>
+  </header>
+
+  <section>
+    <h2>How to use it</h2>
+    <p class="row-lede">Two steps.</p>
+
+    <h2 style="margin-top:20px; font-size:16px;">1 · Copy the install prompt into your coding agent</h2>
+    <p class="row-lede">Works with Claude Code, Cursor, or anything that understands Markdown skills. The prompt tells the agent where to fetch the skill and what to do next.</p>
+    <div class="codebox tight" id="prompt-preview"></div>
+
+    <h2 style="margin-top:28px; font-size:16px;">2 · Or install the skill file directly</h2>
+    <p class="row-lede">If your agent reads skills from a directory, save the file there. For Claude Code that's <code style="font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:1px 6px;border-radius:5px;background:var(--surface);color:var(--accent);border:1px solid var(--border)">~/.claude/skills/mac-cleanup/SKILL.md</code>.</p>
+    <div class="url-block">
+      <span class="ghost">$ </span>curl -fsSL <span id="raw-url">https://friedscholvinck.github.io/atlas/skills/mac-cleanup.md</span> -o ~/.claude/skills/mac-cleanup/SKILL.md
+      <button class="copy-inline" id="copy-curl">copy</button>
+    </div>
+  </section>
+
+  <section>
+    <h2>What's inside</h2>
+    <p class="row-lede">The skill itself — this is what gets copied and what your agent reads.</p>
+    <pre class="skill-preview" id="skill-preview"></pre>
+  </section>
+
+  <footer>
+    <span>© 2026 Fried Scholvinck · MIT licensed · <a href="../">atlas home</a></span>
+    <span><a href="https://github.com/FriedScholvinck/atlas/blob/main/skills/mac-cleanup/SKILL.md">source on github</a></span>
+  </footer>
+</div>
+
+<!-- Skill file content, inlined so copy works offline and server-side. -->
+<script type="text/plain" id="skill-source">---
+name: mac-cleanup
+description: Use this skill when the user wants to clean up their Mac — free disk space, find apps they never open, spot Rosetta-only x86_64 apps, deduplicate brew/zerobrew/mas installs, or audit what's installed. Also use when the user says "what should I uninstall", "why is my disk full", "what haven't I opened in a while", or asks for a storage / software audit of their machine. Works via the `atlas` CLI, which is a local macOS software-graph tool. Everything is local — nothing is uploaded.
+---
+
+# Mac Cleanup with Atlas
+
+Atlas is a local macOS tool that builds a unified inventory of everything installed — `.app` bundles, Homebrew formulas and casks, zerobrew, and App Store apps — and exposes it as a read-only JSON CLI. Use it to help the user audit and clean up their machine without ever uploading their software list.
+
+## When to use this skill
+
+Trigger on requests like:
+
+- "What's eating my disk?" / "my disk is full"
+- "Which apps do I never open?" / "what can I uninstall?"
+- "What's still running under Rosetta?"
+- "Show me duplicates between brew and zerobrew."
+- "Audit my Mac."
+- "What do I have installed?"
+
+## Prerequisites — check first
+
+Before running anything, confirm atlas is installed:
+
+```sh
+command -v atlas || echo "MISSING"
+```
+
+If missing, tell the user to install via one of:
+
+```sh
+curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh
+# or
+brew tap friedscholvinck/atlas https://github.com/FriedScholvinck/atlas.git
+brew install --HEAD atlas
+```
+
+Do not try to install it without their permission — it compiles from source.
+
+## Core workflow
+
+### 1. Start with the summary
+
+Always begin a cleanup session with `atlas doctor --json`. It's cheap (uses the cached snapshot), returns total counts, per-source breakdown, and aggregate storage — enough to orient before drilling in.
+
+```sh
+atlas doctor --json
+```
+
+Sample response shape:
+
+```json
+{
+  "generated_at": "2026-04-22T10:01:16Z",
+  "total": 427,
+  "by_source": { "brew": 194, "manual": 193, "zb": 40 },
+  "by_kind":   { "app": 193, "cask": 12, "formula": 222 },
+  "outdated": 74,
+  "duplicates": 6,
+  "rosetta": 79,
+  "stale": 36,
+  "total_size_bytes": 83150000000,
+  "installers_available": ["brew", "zb"]
+}
+```
+
+If `generated_at` is older than ~a day, run `atlas scan --json` to refresh before making recommendations.
+
+### 2. Pick the right lens for the user's question
+
+| User asks | Command |
+|---|---|
+| "What's huge?" | `atlas list --sort size --limit 20 --json` |
+| "What haven't I opened?" | `atlas list --lens stale --sort old --json` |
+| "Rosetta apps?" | `atlas list --lens rosetta --json` |
+| "Duplicates across installers?" | `atlas list --lens duplicates --json` |
+| "What's outdated?" | `atlas list --lens outdated --json` |
+| "What do I actually use?" | `atlas list --sort frequent --limit 20 --json` |
+| "Info on one app" | `atlas info "<name or bundle-id>" --json` |
+
+### 3. Synthesize, don't dump
+
+Never paste the raw JSON back to the user. Parse it, pick the 5–10 most interesting rows, and present them as a decision list. For each candidate:
+
+- Name and size (humanized, e.g. `2.1 GiB`)
+- Last opened, formatted conversationally (e.g. `3 years ago`, `never opened`)
+- Why you're flagging it (`largest app not opened in 2+ years`, `duplicate of a brew formula`)
+- The exact uninstall path (see below)
+
+### 4. Uninstall routing — never guess
+
+The CLI is read-only by design. When the user decides to uninstall something, generate the right command from the item's `source`:
+
+| Source | Command |
+|---|---|
+| `brew` | `brew uninstall <name>` (formula) or `brew uninstall --cask <name>` |
+| `zerobrew` | `zb uninstall <name>` |
+| `app_store` | App Store uninstalls via Launchpad — tell the user (no CLI path) |
+| `manual` | Move `.app` to Trash: `osascript -e 'tell application "Finder" to delete POSIX file "<install_path>"'` |
+
+Always show the exact command and wait for the user to run it. Never chain uninstalls without confirmation. For manual `.app` bundles, prefer the Finder-trash route over `rm -rf` — reversible, and some apps leave LaunchAgents behind that need a separate cleanup.
+
+## Good cleanup patterns
+
+### "Free the most GiB with the least regret"
+
+```sh
+atlas list --sort size --limit 30 --json
+```
+
+Intersect with `--lens stale` to find big + unused:
+
+```sh
+atlas list --lens stale --sort size --limit 20 --json
+```
+
+These are the highest-leverage uninstalls.
+
+### "Apple Silicon check"
+
+```sh
+atlas list --lens rosetta --sort size --json
+```
+
+For each, check if an arm64 version exists (the user should do this manually — don't guess or fabricate).
+
+### "Duplicate cleanup"
+
+```sh
+atlas list --lens duplicates --json
+```
+
+When the same tool is in brew and zerobrew, the user almost always wants to keep one. `zb` is typically preferred on Apple Silicon; brew is preferred when the user has established brew workflows. Ask — don't decide.
+
+### "Storage freed estimate"
+
+After identifying candidates, sum their `size_bytes` and report:
+
+> "Uninstalling these 8 apps would free ~14.3 GiB."
+
+Round to one decimal; don't over-promise because some apps leave support files behind.
+
+## What NOT to do
+
+- Do not parse `atlas list` plain-text output — always use `--json`.
+- Do not run `atlas scan` every time — it takes 10-30s. Only re-scan if `doctor`'s `generated_at` is stale or the user says "rescan".
+- Do not suggest uninstalling system apps (`/System/Applications/*`) or Xcode without checking first.
+- Do not fabricate data — every recommendation must come from a real CLI response. If a field is `null` (e.g. `last_used`), say "no Spotlight data" rather than inventing a date.
+- Do not run destructive commands. Generate them for the user to execute.
+- Do not upload the inventory anywhere.
+
+## Example session
+
+**User:** "My Mac is full, help me clean up."
+
+**You:**
+
+```
+[run: atlas doctor --json]
+```
+
+→ "You have 427 items installed, taking 77 GiB. 36 apps haven't been opened in 90+ days, and 79 run under Rosetta. Let me find the highest-leverage targets."
+
+```
+[run: atlas list --lens stale --sort size --limit 10 --json]
+```
+
+→ "Top cleanup candidates:
+
+1. **InDesign** — 1.78 GiB, last opened 2023-10-23. Adobe app you haven't touched in 18 months.
+2. **Tableau** — 1.73 GiB, last opened 2023-11-03.
+3. **DBeaver Community** — 154 MiB, last opened 2023-10-26.
+
+Uninstalling these three frees ~3.6 GiB. Want the exact commands?"
+
+Wait for confirmation before generating `osascript ... delete ...` lines.
+
+## Exit criteria
+
+A cleanup session is done when:
+- The user has a clear list of what to remove and how, OR
+- You've confirmed nothing obvious stands out (a healthy Mac with no bloat lens hits is fine).
+
+Don't loop indefinitely. If the user hasn't replied in a few turns, summarize what you found and stop.
+</script>
+
+<script type="text/plain" id="install-prompt-source">Please install the "mac-cleanup" skill from https://friedscholvinck.github.io/atlas/skills/mac-cleanup.md and then start a Mac-cleanup session with me.
+
+Steps:
+1. Fetch the skill file from that URL.
+2. Save it to your skill directory. For Claude Code that's ~/.claude/skills/mac-cleanup/SKILL.md.
+3. Confirm the `atlas` CLI is available by running: command -v atlas
+   If it's missing, install it with: curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh
+4. Then follow the skill: start with `atlas doctor --json` to orient, and walk me through what to uninstall to free disk space.
+
+Everything is local — nothing about my installed software leaves my machine.</script>
+
+<script>
+  const skillSource  = document.getElementById('skill-source').textContent;
+  const promptSource = document.getElementById('install-prompt-source').textContent;
+
+  document.getElementById('skill-preview').textContent = skillSource;
+  document.getElementById('prompt-preview').textContent = promptSource;
+
+  async function copyTo(btn, text, label) {
+    try {
+      await navigator.clipboard.writeText(text);
+      const prev = btn.innerHTML;
+      btn.classList.add('copied');
+      btn.innerHTML = `<span>✓</span> ${label}`;
+      setTimeout(() => {
+        btn.classList.remove('copied');
+        btn.innerHTML = prev;
+      }, 1800);
+    } catch (e) {
+      btn.textContent = 'copy failed';
+    }
+  }
+
+  document.getElementById('copy-prompt').addEventListener('click', e => {
+    copyTo(e.currentTarget, promptSource, 'Prompt copied');
+  });
+  document.getElementById('copy-skill').addEventListener('click', e => {
+    copyTo(e.currentTarget, skillSource, 'Skill copied');
+  });
+  document.getElementById('copy-curl').addEventListener('click', e => {
+    const btn = e.currentTarget;
+    const cmd = 'curl -fsSL https://friedscholvinck.github.io/atlas/skills/mac-cleanup.md -o ~/.claude/skills/mac-cleanup/SKILL.md';
+    navigator.clipboard.writeText(cmd).then(() => {
+      btn.classList.add('copied');
+      btn.textContent = 'copied';
+      setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'copy'; }, 1400);
+    });
+  });
+</script>
+
+</body>
+</html>
