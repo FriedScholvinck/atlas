@@ -144,6 +144,25 @@
   .codebox.tight { max-height: none; }
   .codebox .prompt { color: var(--text-muted); user-select: none; }
 
+  .preview-wrap { position: relative; }
+  .inline-copy {
+    position: absolute;
+    top: 10px;
+    right: 12px;
+    z-index: 2;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    font-family: inherit;
+    transition: color 120ms, border-color 120ms, background 120ms;
+  }
+  .inline-copy:hover { color: var(--text); border-color: #2c3036; }
+  .inline-copy.copied { color: var(--accent); border-color: var(--accent); background: var(--accent-bg); }
+
   .skill-preview {
     margin-top: 12px;
     max-height: 540px;
@@ -210,7 +229,7 @@
     <div class="links">
       <a href="../#install">install</a>
       <a href="../#docs">docs</a>
-      <a href="https://github.com/FriedScholvinck/agent-skill" style="display:none"></a>
+      <a href="./mac-cleanup.md">raw</a>
       <a href="https://github.com/FriedScholvinck/atlas" target="_blank" rel="noopener">github</a>
     </div>
   </nav>
@@ -242,7 +261,10 @@
 
     <h2 style="margin-top:20px; font-size:16px;">1 · Copy the install prompt into your coding agent</h2>
     <p class="row-lede">Works with Claude Code, Cursor, or anything that understands Markdown skills. The prompt tells the agent where to fetch the skill and what to do next.</p>
-    <div class="codebox tight" id="prompt-preview"></div>
+    <div class="preview-wrap">
+      <button class="inline-copy" data-copy-target="prompt-preview" aria-label="Copy install prompt">copy</button>
+      <div class="codebox tight" id="prompt-preview"></div>
+    </div>
 
     <h2 style="margin-top:28px; font-size:16px;">2 · Or install the skill file directly</h2>
     <p class="row-lede">If your agent reads skills from a directory, save the file there. For Claude Code that's <code style="font-family:ui-monospace,Menlo,monospace;font-size:12px;padding:1px 6px;border-radius:5px;background:var(--surface);color:var(--accent);border:1px solid var(--border)">~/.claude/skills/mac-cleanup/SKILL.md</code>.</p>
@@ -254,13 +276,16 @@
 
   <section>
     <h2>What's inside</h2>
-    <p class="row-lede">The skill itself — this is what gets copied and what your agent reads.</p>
-    <pre class="skill-preview" id="skill-preview"></pre>
+    <p class="row-lede">The skill itself — this is what gets copied and what your agent reads. View as <a href="./mac-cleanup.md">plain text</a> at a stable URL.</p>
+    <div class="preview-wrap">
+      <button class="inline-copy" data-copy-target="skill-preview" aria-label="Copy skill file">copy</button>
+      <pre class="skill-preview" id="skill-preview"></pre>
+    </div>
   </section>
 
   <footer>
     <span>© 2026 Fried Scholvinck · MIT licensed · <a href="../">atlas home</a></span>
-    <span><a href="https://github.com/FriedScholvinck/atlas/blob/main/skills/mac-cleanup/SKILL.md">source on github</a></span>
+    <span><a href="./mac-cleanup.md">raw skill file (plain text)</a></span>
   </footer>
 </div>
 
@@ -497,6 +522,28 @@ Everything is local — nothing about my installed software leaves my machine.</
       btn.classList.add('copied');
       btn.textContent = 'copied';
       setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'copy'; }, 1400);
+    });
+  });
+
+  // Inline copy buttons on each preview pane.
+  // target id → which source element to read from
+  const inlineSources = {
+    'prompt-preview': promptSource,
+    'skill-preview':  skillSource,
+  };
+  document.querySelectorAll('.inline-copy').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      const target = btn.dataset.copyTarget;
+      const text = inlineSources[target];
+      if (!text) return;
+      try {
+        await navigator.clipboard.writeText(text);
+        btn.classList.add('copied');
+        btn.textContent = 'copied';
+        setTimeout(() => { btn.classList.remove('copied'); btn.textContent = 'copy'; }, 1400);
+      } catch (e) {
+        btn.textContent = 'copy failed';
+      }
     });
   });
 </script>
