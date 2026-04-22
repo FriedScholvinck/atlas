@@ -144,8 +144,8 @@
   }
   .btn.primary:hover { background: #8bf0f4; border-color: #8bf0f4; color: #0a0b0d; }
 
-  /* terminal preview */
-  .terminal {
+  /* screenshot frame */
+  .shot {
     margin-top: 48px;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
@@ -153,7 +153,7 @@
     overflow: hidden;
     box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(94,226,232,0.04);
   }
-  .terminal-bar {
+  .shot-bar {
     display: flex;
     align-items: center;
     gap: 6px;
@@ -161,82 +161,18 @@
     background: #0f1114;
     border-bottom: 1px solid var(--border);
   }
-  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; background: #2c3036; }
-  .terminal-title {
+  .shot-dot { width: 10px; height: 10px; border-radius: 50%; background: #2c3036; }
+  .shot-title {
     margin-left: 10px;
     font-size: 12px;
     color: var(--text-muted);
     font-family: ui-monospace, "SF Mono", Menlo, monospace;
   }
-  .term {
-    padding: 16px 20px;
-    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
-    font-size: 13px;
-    line-height: 1.55;
-    color: var(--text-dim);
-    overflow-x: auto;
-    white-space: pre;
+  .shot img {
+    display: block;
+    width: 100%;
+    height: auto;
   }
-  .term .title-bar { color: var(--text-muted); margin-bottom: 8px; }
-  .term .title-bar .brand-name { color: var(--accent); font-weight: 600; }
-  .term .title-bar .warn { color: var(--warn); }
-  .term .box {
-    border: 1px solid #22262b;
-    border-radius: 10px;
-    padding: 10px 12px;
-    margin-bottom: 8px;
-    display: grid;
-    grid-template-columns: 170px 1fr 1fr;
-    gap: 16px;
-  }
-  .term .pane-title {
-    color: var(--text-muted);
-    font-size: 11px;
-    letter-spacing: 0.04em;
-    margin-bottom: 6px;
-    text-transform: lowercase;
-  }
-  .term .lens-row { display: flex; justify-content: space-between; color: var(--text-muted); }
-  .term .lens-row.selected { color: var(--accent); }
-  .term .lens-row.selected::before {
-    content: "▎ ";
-    color: var(--accent);
-    margin-left: -10px;
-  }
-  .term .row {
-    display: grid;
-    grid-template-columns: auto 1fr auto auto;
-    gap: 14px;
-    align-items: baseline;
-    color: var(--text-dim);
-  }
-  .term .row.selected { color: var(--text); }
-  .term .row.selected::before {
-    content: "▎ ";
-    color: var(--accent);
-  }
-  .term .row:not(.selected)::before { content: "  "; }
-  .term .src-brew { color: #e5c07b; }
-  .term .src-zb   { color: #c678dd; }
-  .term .src-mas  { color: var(--accent); }
-  .term .src-manual { color: var(--text-muted); }
-  .term .kind { color: var(--text-muted); }
-  .term .meta { color: var(--text-muted); }
-  .term .rosetta { color: var(--bad); font-style: italic; }
-  .term .up { color: var(--warn); }
-  .term .help {
-    color: var(--text-muted);
-    font-size: 12px;
-    margin-top: 10px;
-    border-top: 1px solid var(--border);
-    padding-top: 8px;
-  }
-  .term .help .k { color: var(--accent); font-weight: 600; }
-  .term .details-line { color: var(--text-muted); }
-  .term .details-line .k { color: var(--text-muted); width: 72px; display: inline-block; }
-  .term .details-line .v { color: var(--text); }
-  .term .insights-header { color: var(--accent); margin-top: 6px; }
-  .term .insight-line { color: var(--text-dim); }
 
   /* feature grid */
   section.features {
@@ -445,48 +381,13 @@
       <a href="https://github.com/FriedScholvinck/atlas" target="_blank" rel="noopener" class="btn">View on GitHub</a>
     </div>
 
-    <div class="terminal" aria-hidden="true">
-      <div class="terminal-bar">
-        <span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span>
-        <span class="terminal-title">atlas · ~/repos/atlas</span>
+    <figure class="shot">
+      <div class="shot-bar">
+        <span class="shot-dot"></span><span class="shot-dot"></span><span class="shot-dot"></span>
+        <span class="shot-title">atlas · ~/repos/atlas</span>
       </div>
-      <div class="term">
-<div class="title-bar"><span class="brand-name">atlas</span>  ·  427 items  ·  zb · brew  ·  <span class="warn">74 outdated</span></div>
-<div class="box">
-  <div>
-    <div class="pane-title">lenses</div>
-    <div class="lens-row selected"><span>All</span><span>427</span></div>
-    <div class="lens-row"><span>Outdated</span><span>74</span></div>
-    <div class="lens-row"><span>Duplicates</span><span>6</span></div>
-    <div class="lens-row"><span>Bloat</span><span>50</span></div>
-    <div class="lens-row"><span>Stale</span><span>36</span></div>
-    <div class="lens-row"><span>Rosetta</span><span>79</span></div>
-    <div class="lens-row"><span>Unsigned</span><span>—</span></div>
-  </div>
-  <div>
-    <div class="pane-title">all · everything on disk</div>
-<div class="row selected"><span class="src-zb">zb</span><span class="kind">formula</span><span>ffmpeg</span><span class="meta">8.1 <span class="up">↑</span></span></div>
-<div class="row"><span class="src-brew">brew</span><span class="kind">cask</span><span>visual-studio-code</span><span class="meta">1.116.0 <span class="up">↑</span></span></div>
-<div class="row"><span class="src-manual">manual</span><span class="kind">app</span><span>Kontakt</span><span class="meta">6.1.1 <span class="rosetta">rosetta</span></span></div>
-<div class="row"><span class="src-brew">brew</span><span class="kind">formula</span><span>bat</span><span class="meta">0.26.0</span></div>
-<div class="row"><span class="src-manual">manual</span><span class="kind">app</span><span>LM Studio</span><span class="meta">0.3.24  919 MiB</span></div>
-<div class="row"><span class="src-zb">zb</span><span class="kind">formula</span><span>libpq</span><span class="meta">18.0</span></div>
-<div class="row"><span class="src-brew">brew</span><span class="kind">formula</span><span>coreutils</span><span class="meta">9.10 <span class="up">↑</span></span></div>
-<div class="row"><span class="src-manual">manual</span><span class="kind">app</span><span>Adobe Digital Editions</span><span class="meta"><span class="rosetta">rosetta</span></span></div>
-  </div>
-  <div>
-    <div class="pane-title">details</div>
-<div class="details-line"><span class="k">name</span><span class="v">ffmpeg</span></div>
-<div class="details-line"><span class="k">source</span><span class="v">zerobrew</span></div>
-<div class="details-line"><span class="k">version</span><span class="v">8.1</span></div>
-<div class="details-line"><span class="k">latest</span><span class="v">8.1_1</span></div>
-<div class="insights-header">insights</div>
-<div class="insight-line">·  upgrade available: 8.1 → 8.1_1</div>
-  </div>
-</div>
-<div class="help"><span class="k">j/k</span> nav   <span class="k">/</span> search   <span class="k">[ ]</span> installer   <span class="k">u</span> update   <span class="k">U</span> update all   <span class="k">d</span> delete   <span class="k">?</span> help</div>
-      </div>
-    </div>
+      <img src="./screenshot.png" alt="Atlas TUI showing 427 items across zerobrew, homebrew, and manual .app installs — with inline columns for source, kind, name, version, arch, size, and status markers for outdated and Rosetta apps." loading="lazy" />
+    </figure>
   </header>
 
   <section class="features">

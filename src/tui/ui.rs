@@ -231,21 +231,21 @@ fn render_row(item: &SoftwareItem, selected: bool, focused: bool) -> ListItem<'s
     };
 
     let source_span = Span::styled(
-        format!("{:>5}", item.source.label()),
+        format!("{:>6}", item.source.label()),
         Style::default().fg(source_color(item.source)),
     );
     let kind_span = Span::styled(
-        format!(" {:<7}", item.kind.label()),
+        format!("  {:<7}", item.kind.label()),
         Style::default().fg(MUTED),
     );
-    let name_span = Span::styled(format!(" {}", truncate(&item.name, 30)), name_style);
+    let name_span = Span::styled(pad_display(&item.name, 30), name_style);
 
-    // Metadata is right-aligned and very muted.
+    // Strict columns: name 30, version 14, arch 6, size 10 — no matter what.
     let version = item.version.as_deref().unwrap_or("—");
     let size_str = item
         .size_bytes
         .map(|b| format_size(b, BINARY))
-        .unwrap_or_else(|| "".into());
+        .unwrap_or_default();
     let arch_lbl = match item.arch {
         Arch::Unknown => "",
         a => a.label(),
@@ -253,7 +253,7 @@ fn render_row(item: &SoftwareItem, selected: bool, focused: bool) -> ListItem<'s
 
     let meta = Span::styled(
         format!(
-            "  {:<14} {:<6} {:>9}",
+            "  {:<14} {:>5}  {:>10}",
             truncate(version, 14),
             arch_lbl,
             size_str
@@ -597,6 +597,19 @@ fn truncate(s: &str, max: usize) -> String {
         out.push('…');
         out
     }
+}
+
+/// Truncate to `width` grapheme-ish columns, then right-pad with spaces so the
+/// next span always starts at the same x-coordinate across rows.
+fn pad_display(s: &str, width: usize) -> String {
+    let truncated = truncate(s, width);
+    let n = truncated.chars().count();
+    let mut out = String::with_capacity(width);
+    out.push_str(&truncated);
+    for _ in n..width {
+        out.push(' ');
+    }
+    out
 }
 
 fn human_ago(t: chrono::DateTime<Utc>) -> String {
