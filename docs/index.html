@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>atlas — native control plane for your Mac's software stack</title>
-<meta name="description" content="Atlas is a fast, keyboard-first TUI that unifies everything installed on your Mac across Homebrew, zerobrew, the App Store, and manual installs. Inventory, provenance, updates, disk bloat, Rosetta apps, stale software — one row per thing." />
-<meta property="og:title" content="atlas — native control plane for your Mac" />
+<title>atlas ・ native control plane for your Mac's software stack</title>
+<meta name="description" content="Atlas is a fast, keyboard-first TUI that unifies everything installed on your Mac across Homebrew, zerobrew, the App Store, and manual installs. Inventory, provenance, updates, disk bloat, Rosetta apps, stale software ・ one row per thing." />
+<meta property="og:title" content="atlas ・ native control plane for your Mac" />
 <meta property="og:description" content="Unified view of every app, CLI, formula, and cask on your Mac. Lenses for bloat, staleness, Rosetta, duplicates. Owner-aware updates and uninstalls." />
 <meta property="og:type" content="website" />
 <meta property="og:url" content="https://friedscholvinck.github.io/atlas/" />
@@ -434,7 +434,7 @@
     <span class="eyebrow">v0 · fast, keyboard-first</span>
     <h1>One unified view of <span class="accent">everything installed</span> on your Mac.</h1>
     <p class="lead">
-      Atlas builds a local graph of every app, formula, cask, and CLI — across Homebrew, zerobrew, the App Store, and manual installs — and surfaces it in a fast TUI with lenses for bloat, staleness, Rosetta, duplicates, and updates. One row per thing, not one per installer.
+      Atlas builds a local graph of every app, formula, cask, and CLI ・ across Homebrew, zerobrew, the App Store, and manual installs ・ and surfaces it in a fast TUI with lenses for bloat, staleness, Rosetta, duplicates, and updates. One row per thing, not one per installer.
     </p>
     <div class="cta">
       <a href="#install" class="btn primary">Install →</a>
@@ -446,7 +446,7 @@
         <span class="shot-dot"></span><span class="shot-dot"></span><span class="shot-dot"></span>
         <span class="shot-title">atlas · ~/repos/atlas</span>
       </div>
-      <img src="./screenshot.png" alt="Atlas TUI showing 427 items across zerobrew, homebrew, and manual .app installs — with inline columns for source, kind, name, version, arch, size, and status markers for outdated and Rosetta apps." loading="lazy" />
+      <img src="./screenshot.png" alt="Atlas TUI showing 427 items across zerobrew, homebrew, and manual .app installs ・ with inline columns for source, kind, name, version, arch, size, and status markers for outdated and Rosetta apps." loading="lazy" />
     </figure>
   </header>
 
@@ -457,17 +457,17 @@
       <div class="card">
         <div class="icon">◎</div>
         <h3>Unified inventory</h3>
-        <p>Apps, CLIs, formulas, casks, and App Store installs collapse into a single searchable list. When the same tool is present in two installers, it's one row — attributed to whichever you actually use.</p>
+        <p>Apps, CLIs, formulas, casks, and App Store installs collapse into a single searchable list. When the same tool is present in two installers, it's one row ・ attributed to whichever you actually use.</p>
       </div>
       <div class="card">
         <div class="icon">◆</div>
         <h3>Provenance, not guesses</h3>
-        <p>Every row carries its real source: brew, zerobrew, mas, pkg, or manual. Bundle id, path, arch, size, and last-used date all resolved locally — no cloud, no account.</p>
+        <p>Every row carries its real source: brew, zerobrew, mas, pkg, or manual. Bundle id, path, arch, size, and last-used date all resolved locally ・ no cloud, no account.</p>
       </div>
       <div class="card">
         <div class="icon">⟳</div>
         <h3>Owner-aware actions</h3>
-        <p><code>u</code> to update, <code>U</code> for everything, <code>d</code> to uninstall — all routed through the actual installer. Manual <code>.app</code> bundles go to Finder's Trash, reversibly. Every action shows the literal command before it runs.</p>
+        <p><code>u</code> to update, <code>U</code> for everything, <code>d</code> to uninstall ・ all routed through the actual installer. Manual <code>.app</code> bundles go to Finder's Trash, reversibly. Every action shows the literal command before it runs.</p>
       </div>
     </div>
   </section>
@@ -515,7 +515,7 @@ cargo build --release
       <li><span class="lens-name">All</span><span class="lens-desc">Everything on disk.</span></li>
       <li><span class="lens-name">Outdated</span><span class="lens-desc">Items with a known upgrade available from their installer.</span></li>
       <li><span class="lens-name">Duplicates</span><span class="lens-desc">The same tool installed through more than one manager.</span></li>
-      <li><span class="lens-name">Bloat</span><span class="lens-desc">Top 50 by disk usage — where the bytes actually go.</span></li>
+      <li><span class="lens-name">Bloat</span><span class="lens-desc">Top 50 by disk usage ・ where the bytes actually go.</span></li>
       <li><span class="lens-name">Stale</span><span class="lens-desc">.app bundles you haven't opened in 90+ days.</span></li>
       <li><span class="lens-name">Rosetta</span><span class="lens-desc">x86_64-only apps running under Rosetta on Apple Silicon.</span></li>
       <li><span class="lens-name">Unsigned</span><span class="lens-desc">Items missing a valid code signature. On-demand probe.</span></li>
@@ -536,21 +536,21 @@ cargo build --release
       <div><kbd>[</kbd> <kbd>]</kbd></div><div>cycle installer filter</div>
       <div><kbd>s</kbd></div><div>cycle sort (see below)</div>
       <div><kbd>u</kbd> · <kbd>U</kbd></div><div>update selected · update everything</div>
-      <div><kbd>d</kbd></div><div>delete via installer — or <code>.app</code> to Trash</div>
+      <div><kbd>d</kbd></div><div>delete via installer ・ or <code>.app</code> to Trash</div>
       <div><kbd>r</kbd> · <kbd>e</kbd> · <kbd>?</kbd> · <kbd>q</kbd></div><div>rescan · export · help · quit</div>
     </div>
 
     <h3 class="docs-h">Sort modes</h3>
-    <p class="docs-p">Press <kbd>s</kbd> to cycle. Great for cleanup — find the biggest apps, the ones you never open, the ones you live in.</p>
+    <p class="docs-p">Press <kbd>s</kbd> to cycle. Great for cleanup ・ find the biggest apps, the ones you never open, the ones you live in.</p>
     <ul class="lens-list">
       <li><span class="lens-name">biggest</span><span class="lens-desc">Largest on disk first. Fastest way to free GiB.</span></li>
       <li><span class="lens-name">longest ago</span><span class="lens-desc">Least recently opened first. Surfaces dead weight.</span></li>
       <li><span class="lens-name">recently used</span><span class="lens-desc">Most recently opened first. Shows what your Mac actually runs.</span></li>
-      <li><span class="lens-name">most used</span><span class="lens-desc">Highest Spotlight use-count — your daily drivers.</span></li>
+      <li><span class="lens-name">most used</span><span class="lens-desc">Highest Spotlight use-count ・ your daily drivers.</span></li>
       <li><span class="lens-name">least used</span><span class="lens-desc">Never or barely opened. Cleanup candidates.</span></li>
     </ul>
 
-    <h3 class="docs-h">CLI — for scripts and AI agents</h3>
+    <h3 class="docs-h">CLI ・ for scripts and AI agents</h3>
     <p class="docs-p">Strictly read-only so a scripted caller can't uninstall anything. Every subcommand accepts <code>--json</code>.</p>
     <div class="codeblock" style="margin-top:14px;">
 <span class="prompt">$ </span>atlas doctor --json
@@ -566,7 +566,7 @@ cargo build --release
     </p>
 
     <h3 class="docs-h">For coding agents</h3>
-    <p class="docs-p">Atlas ships a <code>mac-cleanup</code> skill — a self-contained Markdown file you can drop into Claude Code, Cursor, or any skill-aware agent. It teaches the agent when to invoke Atlas, how to synthesize the JSON output, and how to route uninstalls safely.</p>
+    <p class="docs-p">Atlas ships a <code>mac-cleanup</code> skill ・ a self-contained Markdown file you can drop into Claude Code, Cursor, or any skill-aware agent. It teaches the agent when to invoke Atlas, how to synthesize the JSON output, and how to route uninstalls safely.</p>
     <p class="docs-p" style="margin-top:6px;">
       <a href="./skills/mac-cleanup.html" class="btn primary" style="padding:10px 16px;font-weight:500;border-radius:var(--radius);text-decoration:none;display:inline-flex;gap:8px;align-items:center;">→ Install the mac-cleanup skill</a>
       &nbsp;

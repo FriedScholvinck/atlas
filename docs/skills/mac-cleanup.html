@@ -3,9 +3,9 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>mac-cleanup skill — atlas</title>
-<meta name="description" content="Drop-in Markdown skill that teaches Claude Code, Cursor, or any skill-aware coding agent how to use the atlas CLI to audit and clean up your Mac — all locally." />
-<meta property="og:title" content="mac-cleanup skill — atlas" />
+<title>mac-cleanup skill ・ atlas</title>
+<meta name="description" content="Drop-in Markdown skill that teaches Claude Code, Cursor, or any skill-aware coding agent how to use the atlas CLI to audit and clean up your Mac ・ all locally." />
+<meta property="og:title" content="mac-cleanup skill ・ atlas" />
 <meta property="og:description" content="One file. One prompt. Your coding agent audits your Mac." />
 <meta property="og:type" content="article" />
 <meta property="og:url" content="https://friedscholvinck.github.io/atlas/skills/mac-cleanup.html" />
@@ -241,9 +241,9 @@
 
   <header class="hero">
     <span class="eyebrow">agent skill · drop-in Markdown</span>
-    <h1><span class="accent">mac-cleanup</span> — teach your agent to audit your Mac.</h1>
+    <h1><span class="accent">mac-cleanup</span> ・ teach your agent to audit your Mac.</h1>
     <p class="lead">
-      A single self-contained Markdown skill for Claude Code, Cursor, or any skill-aware coding agent. Paste one prompt and your agent fetches the skill, checks the <code style="font-family:inherit;color:var(--accent)">atlas</code> CLI is installed, and starts walking you through what to uninstall — all locally, nothing leaves your machine.
+      A single self-contained Markdown skill for Claude Code, Cursor, or any skill-aware coding agent. Paste one prompt and your agent fetches the skill, checks the <code style="font-family:inherit;color:var(--accent)">atlas</code> CLI is installed, and starts walking you through what to uninstall ・ all locally, nothing leaves your machine.
     </p>
 
     <div class="actions">
@@ -281,7 +281,7 @@
 
   <section>
     <h2>What's inside</h2>
-    <p class="row-lede">The skill itself — this is what gets copied and what your agent reads. View as <a href="./mac-cleanup.md">plain text</a> at a stable URL.</p>
+    <p class="row-lede">The skill itself ・ this is what gets copied and what your agent reads. View as <a href="./mac-cleanup.md">plain text</a> at a stable URL.</p>
     <div class="preview-wrap">
       <button class="inline-copy" data-copy-target="skill-preview" aria-label="Copy skill file">copy</button>
       <pre class="skill-preview" id="skill-preview"></pre>
@@ -297,12 +297,12 @@
 <!-- Skill file content, inlined so copy works offline and server-side. -->
 <script type="text/plain" id="skill-source">---
 name: mac-cleanup
-description: Use this skill when the user wants to clean up their Mac — free disk space, find apps they never open, spot Rosetta-only x86_64 apps, deduplicate brew/zerobrew/mas installs, or audit what's installed. Also use when the user says "what should I uninstall", "why is my disk full", "what haven't I opened in a while", or asks for a storage / software audit of their machine. Works via the `atlas` CLI, which is a local macOS software-graph tool. Everything is local — nothing is uploaded.
+description: Use this skill when the user wants to clean up their Mac ・ free disk space, find apps they never open, spot Rosetta-only x86_64 apps, deduplicate brew/zerobrew/mas installs, or audit what's installed. Also use when the user says "what should I uninstall", "why is my disk full", "what haven't I opened in a while", or asks for a storage / software audit of their machine. Works via the `atlas` CLI, which is a local macOS software-graph tool. Everything is local ・ nothing is uploaded.
 ---
 
 # Mac Cleanup with Atlas
 
-Atlas is a local macOS tool that builds a unified inventory of everything installed — `.app` bundles, Homebrew formulas and casks, zerobrew, and App Store apps — and exposes it as a read-only JSON CLI. Use it to help the user audit and clean up their machine without ever uploading their software list.
+Atlas is a local macOS tool that builds a unified inventory of everything installed ・ `.app` bundles, Homebrew formulas and casks, zerobrew, and App Store apps ・ and exposes it as a read-only JSON CLI. Use it to help the user audit and clean up their machine without ever uploading their software list.
 
 ## When to use this skill
 
@@ -315,7 +315,7 @@ Trigger on requests like:
 - "Audit my Mac."
 - "What do I have installed?"
 
-## Prerequisites — check first
+## Prerequisites ・ check first
 
 Before running anything, confirm atlas is installed:
 
@@ -332,13 +332,13 @@ brew tap friedscholvinck/atlas https://github.com/FriedScholvinck/atlas.git
 brew install --HEAD atlas
 ```
 
-Do not try to install it without their permission — it compiles from source.
+Do not try to install it without their permission ・ it compiles from source.
 
 ## Core workflow
 
 ### 1. Start with the summary
 
-Always begin a cleanup session with `atlas doctor --json`. It's cheap (uses the cached snapshot), returns total counts, per-source breakdown, and aggregate storage — enough to orient before drilling in.
+Always begin a cleanup session with `atlas doctor --json`. It's cheap (uses the cached snapshot), returns total counts, per-source breakdown, and aggregate storage ・ enough to orient before drilling in.
 
 ```sh
 atlas doctor --json
@@ -384,7 +384,7 @@ Never paste the raw JSON back to the user. Parse it, pick the 5–10 most intere
 - Why you're flagging it (`largest app not opened in 2+ years`, `duplicate of a brew formula`)
 - The exact uninstall path (see below)
 
-### 4. Uninstall routing — never guess
+### 4. Uninstall routing ・ never guess
 
 The CLI is read-only by design. When the user decides to uninstall something, generate the right command from the item's `source`:
 
@@ -392,10 +392,10 @@ The CLI is read-only by design. When the user decides to uninstall something, ge
 |---|---|
 | `brew` | `brew uninstall <name>` (formula) or `brew uninstall --cask <name>` |
 | `zerobrew` | `zb uninstall <name>` |
-| `app_store` | App Store uninstalls via Launchpad — tell the user (no CLI path) |
+| `app_store` | App Store uninstalls via Launchpad ・ tell the user (no CLI path) |
 | `manual` | Move `.app` to Trash: `osascript -e 'tell application "Finder" to delete POSIX file "<install_path>"'` |
 
-Always show the exact command and wait for the user to run it. Never chain uninstalls without confirmation. For manual `.app` bundles, prefer the Finder-trash route over `rm -rf` — reversible, and some apps leave LaunchAgents behind that need a separate cleanup.
+Always show the exact command and wait for the user to run it. Never chain uninstalls without confirmation. For manual `.app` bundles, prefer the Finder-trash route over `rm -rf` ・ reversible, and some apps leave LaunchAgents behind that need a separate cleanup.
 
 ## Good cleanup patterns
 
@@ -419,7 +419,7 @@ These are the highest-leverage uninstalls.
 atlas list --lens rosetta --sort size --json
 ```
 
-For each, check if an arm64 version exists (the user should do this manually — don't guess or fabricate).
+For each, check if an arm64 version exists (the user should do this manually ・ don't guess or fabricate).
 
 ### "Duplicate cleanup"
 
@@ -427,7 +427,7 @@ For each, check if an arm64 version exists (the user should do this manually —
 atlas list --lens duplicates --json
 ```
 
-When the same tool is in brew and zerobrew, the user almost always wants to keep one. `zb` is typically preferred on Apple Silicon; brew is preferred when the user has established brew workflows. Ask — don't decide.
+When the same tool is in brew and zerobrew, the user almost always wants to keep one. `zb` is typically preferred on Apple Silicon; brew is preferred when the user has established brew workflows. Ask ・ don't decide.
 
 ### "Storage freed estimate"
 
@@ -439,10 +439,10 @@ Round to one decimal; don't over-promise because some apps leave support files b
 
 ## What NOT to do
 
-- Do not parse `atlas list` plain-text output — always use `--json`.
-- Do not run `atlas scan` every time — it takes 10-30s. Only re-scan if `doctor`'s `generated_at` is stale or the user says "rescan".
+- Do not parse `atlas list` plain-text output ・ always use `--json`.
+- Do not run `atlas scan` every time ・ it takes 10-30s. Only re-scan if `doctor`'s `generated_at` is stale or the user says "rescan".
 - Do not suggest uninstalling system apps (`/System/Applications/*`) or Xcode without checking first.
-- Do not fabricate data — every recommendation must come from a real CLI response. If a field is `null` (e.g. `last_used`), say "no Spotlight data" rather than inventing a date.
+- Do not fabricate data ・ every recommendation must come from a real CLI response. If a field is `null` (e.g. `last_used`), say "no Spotlight data" rather than inventing a date.
 - Do not run destructive commands. Generate them for the user to execute.
 - Do not upload the inventory anywhere.
 
@@ -464,9 +464,9 @@ Round to one decimal; don't over-promise because some apps leave support files b
 
 → "Top cleanup candidates:
 
-1. **InDesign** — 1.78 GiB, last opened 2023-10-23. Adobe app you haven't touched in 18 months.
-2. **Tableau** — 1.73 GiB, last opened 2023-11-03.
-3. **DBeaver Community** — 154 MiB, last opened 2023-10-26.
+1. **InDesign** ・ 1.78 GiB, last opened 2023-10-23. Adobe app you haven't touched in 18 months.
+2. **Tableau** ・ 1.73 GiB, last opened 2023-11-03.
+3. **DBeaver Community** ・ 154 MiB, last opened 2023-10-26.
 
 Uninstalling these three frees ~3.6 GiB. Want the exact commands?"
 
@@ -490,7 +490,7 @@ Steps:
    If it's missing, install it with: curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh
 4. Then follow the skill: start with `atlas doctor --json` to orient, and walk me through what to uninstall to free disk space.
 
-Everything is local — nothing about my installed software leaves my machine.</script>
+Everything is local ・ nothing about my installed software leaves my machine.</script>
 
 <script>
   const skillSource  = document.getElementById('skill-source').textContent;
