@@ -369,6 +369,17 @@ Position Atlas as:
 - Restore manifest generated with actionable recipes for 80%+ of inventoried items.
 - Users remove duplicate/unmanaged software after seeing provenance and drift.
 
+## Agent-facing CLI
+
+The TUI is for humans; the subcommand surface is for everything else (shell, CI, LLM agents). Strictly read-only in v0 — action verbs (`u`/`U`/`d`) remain TUI-only so an agent can't accidentally uninstall via an LLM hallucination.
+
+- `atlas list [--json] [--lens <l>] [--source <s>] [--filter <q>] [--rescan]` — query the merged inventory. JSON emits the full `SoftwareItem` records; plain text emits `source kind name version`. Filter matches name or bundle-id.
+- `atlas info <name|bundle-id|id> [--json]` — single-record detail, useful for "does X exist, and if so where".
+- `atlas doctor [--json]` — single-shot summary: total items, outdated/duplicates/rosetta/stale counts, storage footprint, which installers are present. Cheap to pipe into a model as context.
+- `atlas scan [--json]` — forced rescan; JSON returns `{items, elapsed_ms, snapshot_path}`.
+
+Everything reuses the same snapshot cache as the TUI, so repeat calls are instant. Nothing here mutates system state.
+
 ## Distribution (v0)
 
 Distribution predates a tagged release, so everything flows through source builds:

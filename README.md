@@ -35,6 +35,20 @@ cargo build --release
 ./target/release/atlas tui
 ```
 
+## For scripts & AI agents
+
+Atlas exposes a read-only JSON query surface so LLM agents, shell scripts, or CI checks can inspect what's on the machine without attaching a TTY:
+
+```sh
+atlas doctor --json                            # total / outdated / rosetta / by-source / by-kind
+atlas list --lens outdated --json              # every upgradeable item, full records
+atlas list --source brew --filter ripgrep      # plain-text for piping
+atlas info com.apple.dt.Xcode --json           # one item by bundle-id, name, or id
+```
+
+Lenses: `all · outdated · duplicates · bloat · stale · rosetta · unsigned`.
+Sources: `brew · zb · mas · nix · pkg · manual`. Add `--rescan` to bypass the cached snapshot.
+
 ## Keys
 
 ```
