@@ -1,0 +1,630 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>atlas — native control plane for your Mac's software stack</title>
+<meta name="description" content="Atlas is a fast, keyboard-first TUI that unifies everything installed on your Mac across Homebrew, zerobrew, the App Store, and manual installs. Inventory, provenance, updates, disk bloat, Rosetta apps, stale software — one row per thing." />
+<meta property="og:title" content="atlas — native control plane for your Mac" />
+<meta property="og:description" content="Unified view of every app, CLI, formula, and cask on your Mac. Lenses for bloat, staleness, Rosetta, duplicates. Owner-aware updates and uninstalls." />
+<meta property="og:type" content="website" />
+<meta property="og:url" content="https://friedscholvinck.github.io/atlas/" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='28' fill='none' stroke='%235ee2e8' stroke-width='4'/%3E%3Ccircle cx='32' cy='32' r='6' fill='%235ee2e8'/%3E%3C/svg%3E" />
+<style>
+  :root {
+    --bg: #0a0b0d;
+    --surface: #111317;
+    --surface-2: #161a1f;
+    --border: #1e2227;
+    --text: #e6e9ec;
+    --text-dim: #9aa1a9;
+    --text-muted: #5c636b;
+    --accent: #5ee2e8;
+    --accent-dim: #2a9ca1;
+    --accent-bg: rgba(94, 226, 232, 0.08);
+    --warn: #f0c674;
+    --bad: #e06c75;
+    --good: #98c379;
+    --radius: 14px;
+    --radius-lg: 20px;
+  }
+
+  * { box-sizing: border-box; }
+  html, body {
+    margin: 0;
+    padding: 0;
+    background: var(--bg);
+    color: var(--text);
+    font-family: -apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+  }
+  body {
+    min-height: 100vh;
+    background:
+      radial-gradient(ellipse 80% 60% at 50% -10%, rgba(94,226,232,0.07), transparent 60%),
+      var(--bg);
+  }
+
+  a { color: var(--accent); text-decoration: none; }
+  a:hover { color: #fff; }
+
+  .wrap {
+    max-width: 1020px;
+    margin: 0 auto;
+    padding: 0 24px;
+  }
+
+  /* nav */
+  nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 24px 0;
+  }
+  .brand {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .brand-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 12px rgba(94,226,232,0.5);
+  }
+  nav .links { display: flex; gap: 24px; font-size: 14px; color: var(--text-dim); }
+  nav .links a { color: var(--text-dim); }
+  nav .links a:hover { color: var(--text); }
+
+  /* hero */
+  .hero {
+    padding: 72px 0 56px;
+    text-align: left;
+  }
+  .hero .eyebrow {
+    display: inline-block;
+    padding: 4px 10px;
+    font-size: 12px;
+    font-weight: 500;
+    color: var(--accent);
+    background: var(--accent-bg);
+    border: 1px solid rgba(94,226,232,0.2);
+    border-radius: 999px;
+    margin-bottom: 20px;
+    letter-spacing: 0.02em;
+  }
+  .hero h1 {
+    margin: 0 0 18px;
+    font-size: clamp(36px, 6vw, 58px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    font-weight: 600;
+    color: var(--text);
+  }
+  .hero h1 .accent { color: var(--accent); }
+  .hero p.lead {
+    margin: 0 0 30px;
+    font-size: clamp(16px, 2vw, 19px);
+    color: var(--text-dim);
+    max-width: 680px;
+    line-height: 1.55;
+  }
+  .cta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: center;
+  }
+  .btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border);
+    background: var(--surface);
+    color: var(--text);
+    font-size: 14px;
+    font-weight: 500;
+    transition: background 120ms, border-color 120ms, color 120ms;
+    cursor: pointer;
+  }
+  .btn:hover { background: var(--surface-2); border-color: #2c3036; color: var(--text); }
+  .btn.primary {
+    background: var(--accent);
+    color: #0a0b0d;
+    border-color: var(--accent);
+  }
+  .btn.primary:hover { background: #8bf0f4; border-color: #8bf0f4; color: #0a0b0d; }
+
+  /* terminal preview */
+  .terminal {
+    margin-top: 48px;
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: #0c0e11;
+    overflow: hidden;
+    box-shadow: 0 30px 80px -20px rgba(0,0,0,0.6), 0 0 0 1px rgba(94,226,232,0.04);
+  }
+  .terminal-bar {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 14px;
+    background: #0f1114;
+    border-bottom: 1px solid var(--border);
+  }
+  .terminal-dot { width: 10px; height: 10px; border-radius: 50%; background: #2c3036; }
+  .terminal-title {
+    margin-left: 10px;
+    font-size: 12px;
+    color: var(--text-muted);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+  }
+  .term {
+    padding: 16px 20px;
+    font-family: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+    font-size: 13px;
+    line-height: 1.55;
+    color: var(--text-dim);
+    overflow-x: auto;
+    white-space: pre;
+  }
+  .term .title-bar { color: var(--text-muted); margin-bottom: 8px; }
+  .term .title-bar .brand-name { color: var(--accent); font-weight: 600; }
+  .term .title-bar .warn { color: var(--warn); }
+  .term .box {
+    border: 1px solid #22262b;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    display: grid;
+    grid-template-columns: 170px 1fr 1fr;
+    gap: 16px;
+  }
+  .term .pane-title {
+    color: var(--text-muted);
+    font-size: 11px;
+    letter-spacing: 0.04em;
+    margin-bottom: 6px;
+    text-transform: lowercase;
+  }
+  .term .lens-row { display: flex; justify-content: space-between; color: var(--text-muted); }
+  .term .lens-row.selected { color: var(--accent); }
+  .term .lens-row.selected::before {
+    content: "▎ ";
+    color: var(--accent);
+    margin-left: -10px;
+  }
+  .term .row {
+    display: grid;
+    grid-template-columns: auto 1fr auto auto;
+    gap: 14px;
+    align-items: baseline;
+    color: var(--text-dim);
+  }
+  .term .row.selected { color: var(--text); }
+  .term .row.selected::before {
+    content: "▎ ";
+    color: var(--accent);
+  }
+  .term .row:not(.selected)::before { content: "  "; }
+  .term .src-brew { color: #e5c07b; }
+  .term .src-zb   { color: #c678dd; }
+  .term .src-mas  { color: var(--accent); }
+  .term .src-manual { color: var(--text-muted); }
+  .term .kind { color: var(--text-muted); }
+  .term .meta { color: var(--text-muted); }
+  .term .rosetta { color: var(--bad); font-style: italic; }
+  .term .up { color: var(--warn); }
+  .term .help {
+    color: var(--text-muted);
+    font-size: 12px;
+    margin-top: 10px;
+    border-top: 1px solid var(--border);
+    padding-top: 8px;
+  }
+  .term .help .k { color: var(--accent); font-weight: 600; }
+  .term .details-line { color: var(--text-muted); }
+  .term .details-line .k { color: var(--text-muted); width: 72px; display: inline-block; }
+  .term .details-line .v { color: var(--text); }
+  .term .insights-header { color: var(--accent); margin-top: 6px; }
+  .term .insight-line { color: var(--text-dim); }
+
+  /* feature grid */
+  section.features {
+    padding: 72px 0;
+  }
+  section h2 {
+    margin: 0 0 10px;
+    font-size: 28px;
+    letter-spacing: -0.02em;
+    font-weight: 600;
+  }
+  section .lede {
+    color: var(--text-dim);
+    margin: 0 0 36px;
+    max-width: 600px;
+  }
+  .grid-3 {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 14px;
+  }
+  @media (max-width: 760px) {
+    .grid-3 { grid-template-columns: 1fr; }
+  }
+  .card {
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 22px 22px 24px;
+    background: var(--surface);
+    transition: border-color 160ms, background 160ms;
+  }
+  .card:hover { border-color: #2c3036; background: var(--surface-2); }
+  .card .icon {
+    width: 28px;
+    height: 28px;
+    border-radius: 8px;
+    background: var(--accent-bg);
+    color: var(--accent);
+    display: grid;
+    place-items: center;
+    font-size: 14px;
+    margin-bottom: 14px;
+  }
+  .card h3 {
+    margin: 0 0 6px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+  }
+  .card p {
+    margin: 0;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.55;
+  }
+
+  /* install */
+  section.install { padding: 8px 0 72px; }
+  .tabs { display: flex; gap: 4px; margin-bottom: 10px; }
+  .tab {
+    padding: 8px 14px;
+    border-radius: 10px;
+    background: transparent;
+    border: 1px solid transparent;
+    color: var(--text-dim);
+    font-size: 13px;
+    font-family: inherit;
+    cursor: pointer;
+    font-weight: 500;
+  }
+  .tab.active { background: var(--surface); border-color: var(--border); color: var(--text); }
+  .tab:hover:not(.active) { color: var(--text); }
+  .codeblock {
+    position: relative;
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    background: #0c0e11;
+    padding: 16px 18px;
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 13px;
+    line-height: 1.65;
+    color: var(--text);
+    overflow-x: auto;
+  }
+  .codeblock .prompt { color: var(--text-muted); user-select: none; }
+  .copy-btn {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    padding: 4px 10px;
+    font-size: 11px;
+    color: var(--text-muted);
+    background: transparent;
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    cursor: pointer;
+    transition: color 120ms, border-color 120ms;
+    font-family: inherit;
+  }
+  .copy-btn:hover { color: var(--text); border-color: #2c3036; }
+  .copy-btn.copied { color: var(--accent); border-color: var(--accent); }
+
+  /* lenses list */
+  .lens-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 10px 24px;
+    margin-top: 20px;
+  }
+  @media (max-width: 680px) {
+    .lens-list { grid-template-columns: 1fr; }
+  }
+  .lens-list li {
+    list-style: none;
+    padding: 12px 0;
+    border-top: 1px solid var(--border);
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    align-items: baseline;
+    gap: 14px;
+  }
+  .lens-name {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--accent);
+    font-size: 13px;
+    font-weight: 500;
+  }
+  .lens-desc { color: var(--text-dim); font-size: 14px; }
+
+  /* not-list */
+  .not-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    margin-top: 24px;
+  }
+  @media (max-width: 760px) {
+    .not-grid { grid-template-columns: 1fr; }
+  }
+  .not-col h4 {
+    margin: 0 0 10px;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    color: var(--text-muted);
+  }
+  .not-col ul { margin: 0; padding: 0; list-style: none; }
+  .not-col li {
+    padding: 6px 0;
+    color: var(--text-dim);
+    font-size: 14px;
+    display: flex;
+    gap: 10px;
+  }
+  .not-col.is li::before { content: "+"; color: var(--accent); font-weight: 700; }
+  .not-col.isnot li::before { content: "−"; color: var(--text-muted); font-weight: 700; }
+
+  /* footer */
+  footer {
+    border-top: 1px solid var(--border);
+    margin-top: 56px;
+    padding: 28px 0 60px;
+    color: var(--text-muted);
+    font-size: 13px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 14px;
+  }
+  footer a { color: var(--text-dim); }
+  footer a:hover { color: var(--text); }
+
+  /* section divider */
+  .divider {
+    height: 1px;
+    background: var(--border);
+    margin: 0 auto;
+    max-width: 960px;
+  }
+
+  /* small touches */
+  ::selection { background: rgba(94,226,232,0.25); color: var(--text); }
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <nav>
+    <div class="brand"><span class="brand-dot"></span><span>atlas</span></div>
+    <div class="links">
+      <a href="#install">install</a>
+      <a href="#lenses">lenses</a>
+      <a href="https://github.com/FriedScholvinck/atlas" target="_blank" rel="noopener">github</a>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <span class="eyebrow">v0 · fast, keyboard-first</span>
+    <h1>One unified view of <span class="accent">everything installed</span> on your Mac.</h1>
+    <p class="lead">
+      Atlas builds a local graph of every app, formula, cask, and CLI — across Homebrew, zerobrew, the App Store, and manual installs — and surfaces it in a fast TUI with lenses for bloat, staleness, Rosetta, duplicates, and updates. One row per thing, not one per installer.
+    </p>
+    <div class="cta">
+      <a href="#install" class="btn primary">Install →</a>
+      <a href="https://github.com/FriedScholvinck/atlas" target="_blank" rel="noopener" class="btn">View on GitHub</a>
+    </div>
+
+    <div class="terminal" aria-hidden="true">
+      <div class="terminal-bar">
+        <span class="terminal-dot"></span><span class="terminal-dot"></span><span class="terminal-dot"></span>
+        <span class="terminal-title">atlas · ~/repos/atlas</span>
+      </div>
+      <div class="term">
+<div class="title-bar"><span class="brand-name">atlas</span>  ·  427 items  ·  zb · brew  ·  <span class="warn">74 outdated</span></div>
+<div class="box">
+  <div>
+    <div class="pane-title">lenses</div>
+    <div class="lens-row selected"><span>All</span><span>427</span></div>
+    <div class="lens-row"><span>Outdated</span><span>74</span></div>
+    <div class="lens-row"><span>Duplicates</span><span>6</span></div>
+    <div class="lens-row"><span>Bloat</span><span>50</span></div>
+    <div class="lens-row"><span>Stale</span><span>36</span></div>
+    <div class="lens-row"><span>Rosetta</span><span>79</span></div>
+    <div class="lens-row"><span>Unsigned</span><span>—</span></div>
+  </div>
+  <div>
+    <div class="pane-title">all · everything on disk</div>
+<div class="row selected"><span class="src-zb">zb</span><span class="kind">formula</span><span>ffmpeg</span><span class="meta">8.1 <span class="up">↑</span></span></div>
+<div class="row"><span class="src-brew">brew</span><span class="kind">cask</span><span>visual-studio-code</span><span class="meta">1.116.0 <span class="up">↑</span></span></div>
+<div class="row"><span class="src-manual">manual</span><span class="kind">app</span><span>Kontakt</span><span class="meta">6.1.1 <span class="rosetta">rosetta</span></span></div>
+<div class="row"><span class="src-brew">brew</span><span class="kind">formula</span><span>bat</span><span class="meta">0.26.0</span></div>
+<div class="row"><span class="src-manual">manual</span><span class="kind">app</span><span>LM Studio</span><span class="meta">0.3.24  919 MiB</span></div>
+<div class="row"><span class="src-zb">zb</span><span class="kind">formula</span><span>libpq</span><span class="meta">18.0</span></div>
+<div class="row"><span class="src-brew">brew</span><span class="kind">formula</span><span>coreutils</span><span class="meta">9.10 <span class="up">↑</span></span></div>
+<div class="row"><span class="src-manual">manual</span><span class="kind">app</span><span>Adobe Digital Editions</span><span class="meta"><span class="rosetta">rosetta</span></span></div>
+  </div>
+  <div>
+    <div class="pane-title">details</div>
+<div class="details-line"><span class="k">name</span><span class="v">ffmpeg</span></div>
+<div class="details-line"><span class="k">source</span><span class="v">zerobrew</span></div>
+<div class="details-line"><span class="k">version</span><span class="v">8.1</span></div>
+<div class="details-line"><span class="k">latest</span><span class="v">8.1_1</span></div>
+<div class="insights-header">insights</div>
+<div class="insight-line">·  upgrade available: 8.1 → 8.1_1</div>
+  </div>
+</div>
+<div class="help"><span class="k">j/k</span> nav   <span class="k">/</span> search   <span class="k">[ ]</span> installer   <span class="k">u</span> update   <span class="k">U</span> update all   <span class="k">d</span> delete   <span class="k">?</span> help</div>
+      </div>
+    </div>
+  </header>
+
+  <section class="features">
+    <h2>What Atlas shows you</h2>
+    <p class="lede">Three questions every Mac user asks occasionally and no tool answers cleanly.</p>
+    <div class="grid-3">
+      <div class="card">
+        <div class="icon">◎</div>
+        <h3>Unified inventory</h3>
+        <p>Apps, CLIs, formulas, casks, and App Store installs collapse into a single searchable list. When the same tool is present in two installers, it's one row — attributed to whichever you actually use.</p>
+      </div>
+      <div class="card">
+        <div class="icon">◆</div>
+        <h3>Provenance, not guesses</h3>
+        <p>Every row carries its real source: brew, zerobrew, mas, pkg, or manual. Bundle id, path, arch, size, and last-used date all resolved locally — no cloud, no account.</p>
+      </div>
+      <div class="card">
+        <div class="icon">⟳</div>
+        <h3>Owner-aware actions</h3>
+        <p><code>u</code> to update, <code>U</code> for everything, <code>d</code> to uninstall — all routed through the actual installer. Manual <code>.app</code> bundles go to Finder's Trash, reversibly. Every action shows the literal command before it runs.</p>
+      </div>
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="install" id="install">
+    <h2>Install</h2>
+    <p class="lede">macOS 13+ on Apple Silicon or Intel. A working Rust toolchain is required for v0 while prebuilt binaries are still being wired up.</p>
+
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-target="curl" role="tab">curl</button>
+      <button class="tab" data-target="brew" role="tab">brew</button>
+      <button class="tab" data-target="src" role="tab">from source</button>
+    </div>
+
+    <div class="codeblock" data-panel="curl">
+      <button class="copy-btn" data-copy="curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh">copy</button>
+      <span class="prompt">$ </span>curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh
+    </div>
+    <div class="codeblock" data-panel="brew" hidden>
+      <button class="copy-btn" data-copy="brew tap friedscholvinck/atlas https://github.com/FriedScholvinck/atlas.git
+brew install --HEAD atlas">copy</button>
+<span class="prompt">$ </span>brew tap friedscholvinck/atlas https://github.com/FriedScholvinck/atlas.git
+<span class="prompt">$ </span>brew install --HEAD atlas
+    </div>
+    <div class="codeblock" data-panel="src" hidden>
+      <button class="copy-btn" data-copy="git clone https://github.com/FriedScholvinck/atlas.git
+cd atlas
+cargo build --release
+./target/release/atlas tui">copy</button>
+<span class="prompt">$ </span>git clone https://github.com/FriedScholvinck/atlas.git
+<span class="prompt">$ </span>cd atlas
+<span class="prompt">$ </span>cargo build --release
+<span class="prompt">$ </span>./target/release/atlas tui
+    </div>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="features" id="lenses">
+    <h2>Lenses</h2>
+    <p class="lede">One-keystroke filters over the same inventory. Each answers a question you ask yourself occasionally.</p>
+    <ul class="lens-list">
+      <li><span class="lens-name">All</span><span class="lens-desc">Everything on disk.</span></li>
+      <li><span class="lens-name">Outdated</span><span class="lens-desc">Items with a known upgrade available from their installer.</span></li>
+      <li><span class="lens-name">Duplicates</span><span class="lens-desc">The same tool installed through more than one manager.</span></li>
+      <li><span class="lens-name">Bloat</span><span class="lens-desc">Top 50 by disk usage — where the bytes actually go.</span></li>
+      <li><span class="lens-name">Stale</span><span class="lens-desc">.app bundles you haven't opened in 90+ days.</span></li>
+      <li><span class="lens-name">Rosetta</span><span class="lens-desc">x86_64-only apps running under Rosetta on Apple Silicon.</span></li>
+      <li><span class="lens-name">Unsigned</span><span class="lens-desc">Items missing a valid code signature. On-demand probe.</span></li>
+    </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="features">
+    <h2>Positioning</h2>
+    <p class="lede">Atlas sits above your package managers. It doesn't want to be one.</p>
+    <div class="not-grid">
+      <div class="not-col is">
+        <h4>what it is</h4>
+        <ul>
+          <li>A unified read-model of everything installed.</li>
+          <li>A calmer interface to brew, zerobrew, mas, and `.app` bundles.</li>
+          <li>A reproducible manifest of your Mac for migration.</li>
+          <li>A set of lenses that surface bloat, staleness, Rosetta, duplicates.</li>
+        </ul>
+      </div>
+      <div class="not-col isnot">
+        <h4>what it is not</h4>
+        <ul>
+          <li>A replacement for Homebrew, Nix, or the App Store.</li>
+          <li>An MDM, kernel extension, or policy engine.</li>
+          <li>A cloud service. Everything stays local.</li>
+          <li>A background daemon. Launch it when you need it.</li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <footer>
+    <span>© 2026 Fried Scholvinck · MIT licensed</span>
+    <span><a href="https://github.com/FriedScholvinck/atlas">github.com/FriedScholvinck/atlas</a></span>
+  </footer>
+</div>
+
+<script>
+  // Install tab switching
+  const tabs = document.querySelectorAll('.tab');
+  const panels = document.querySelectorAll('[data-panel]');
+  tabs.forEach(t => {
+    t.addEventListener('click', () => {
+      tabs.forEach(x => x.classList.remove('active'));
+      t.classList.add('active');
+      const target = t.dataset.target;
+      panels.forEach(p => p.hidden = p.dataset.panel !== target);
+    });
+  });
+
+  // Copy to clipboard
+  document.querySelectorAll('.copy-btn').forEach(btn => {
+    btn.addEventListener('click', async () => {
+      try {
+        await navigator.clipboard.writeText(btn.dataset.copy);
+        const prev = btn.textContent;
+        btn.textContent = 'copied';
+        btn.classList.add('copied');
+        setTimeout(() => {
+          btn.textContent = prev;
+          btn.classList.remove('copied');
+        }, 1400);
+      } catch (e) {
+        btn.textContent = 'copy failed';
+      }
+    });
+  });
+</script>
+
+</body>
+</html>

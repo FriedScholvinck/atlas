@@ -1,0 +1,4 @@
+target/
+atlas-export/
+.DS_Store
+*.swp
