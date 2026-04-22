@@ -10,7 +10,7 @@ One unified view of every `.app`, formula, cask, and App Store install — with 
 
 <br>
 
-<img src="./public/screenshot.png" alt="Atlas TUI — 427 items across zb, brew, and manual installs" width="900" />
+<img src="./docs/screenshot.png" alt="Atlas TUI — 427 items across zb, brew, and manual installs" width="900" />
 
 </div>
 
