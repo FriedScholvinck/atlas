@@ -69,6 +69,6 @@ atlas info com.apple.dt.Xcode --json
 
 - Landing page: `docs/index.html`, served at `https://friedscholvinck.github.io/atlas/` from the `main` branch `/docs` folder.
 - Install: `docs/install.sh` (cargo-install fallback) and `Formula/atlas.rb` (HEAD-only Homebrew tap).
-- Agent skill: `skills/mac-cleanup/SKILL.md`, with a hosted dedicated page at `docs/skills/mac-cleanup.html`.
+- Agent skill: **canonical single source** at `skills/mac-cleanup/SKILL.md`. The landing page `docs/skills/mac-cleanup.html` fetches it at load time from `raw.githubusercontent.com`. Do not duplicate the file under `docs/`.
 
 Changes to any of these need to stay in sync — if you bump a CLI flag, grep for it across `docs/` and `skills/` too.
