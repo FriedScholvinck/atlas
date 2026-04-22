@@ -369,16 +369,47 @@ Position Atlas as:
 - Restore manifest generated with actionable recipes for 80%+ of inventoried items.
 - Users remove duplicate/unmanaged software after seeing provenance and drift.
 
+## Sort model
+
+Orthogonal to lenses, a one-key sort (`s` in the TUI, `--sort` on the CLI) ranks the currently visible list. Motivation: the dominant use-case for Atlas is "I need to clean up my Mac" and cleanup requires answering *"what's biggest?"*, *"what haven't I opened?"*, *"what am I actually using?"* — orthogonal questions to lensing.
+
+| Mode | What it does | When to use |
+|---|---|---|
+| `size` (biggest) | desc by `size_bytes` | "free the most GiB" |
+| `old` (longest ago) | asc by `last_used` | "what haven't I touched?" |
+| `recent` | desc by `last_used` | "what did I run this week?" |
+| `frequent` | desc by `use_count` | daily drivers |
+| `rare` | asc by `use_count` | low-value installs |
+
+Items with `None` for the sort key drop to the bottom — "no Spotlight data" is its own category rather than a tied rank.
+
+`use_count` is populated from Spotlight's `kMDItemUseCount` during `.app` scanning. Like `kMDItemLastUsedDate`, it can be missing for sandbox-restricted apps; the model stores `Option<u32>` and the UI tolerates `None` everywhere.
+
+The TUI's `s` keybinding cycles through `[None, SizeDesc, LastUsedAsc, LastUsedDesc, UseCountDesc, UseCountAsc]` in that order. The cycle starts at `SizeDesc` on first press (biggest-first is the cleanup default), then progresses through the time-based modes, then the frequency modes, then resets to unsorted.
+
 ## Agent-facing CLI
 
 The TUI is for humans; the subcommand surface is for everything else (shell, CI, LLM agents). Strictly read-only in v0 — action verbs (`u`/`U`/`d`) remain TUI-only so an agent can't accidentally uninstall via an LLM hallucination.
 
-- `atlas list [--json] [--lens <l>] [--source <s>] [--filter <q>] [--rescan]` — query the merged inventory. JSON emits the full `SoftwareItem` records; plain text emits `source kind name version`. Filter matches name or bundle-id.
+- `atlas list [--json] [--lens <l>] [--source <s>] [--filter <q>] [--sort <m>] [--limit N] [--rescan]` — query the merged inventory. JSON emits the full `SoftwareItem` records; plain text emits `source kind name version size last_used`. Filter matches name or bundle-id. `--sort` accepts `size/old/recent/frequent/rare/none`.
 - `atlas info <name|bundle-id|id> [--json]` — single-record detail, useful for "does X exist, and if so where".
 - `atlas doctor [--json]` — single-shot summary: total items, outdated/duplicates/rosetta/stale counts, storage footprint, which installers are present. Cheap to pipe into a model as context.
 - `atlas scan [--json]` — forced rescan; JSON returns `{items, elapsed_ms, snapshot_path}`.
 
 Everything reuses the same snapshot cache as the TUI, so repeat calls are instant. Nothing here mutates system state.
+
+## Agent skill
+
+A self-contained Markdown skill at `skills/mac-cleanup/SKILL.md` teaches coding agents (Claude Code, Cursor, anything that understands the skill convention) when and how to invoke Atlas for cleanup tasks. It is optional — the CLI is usable without it — but it encodes the *judgment* pieces we don't want to re-derive each time:
+
+- Always start with `atlas doctor --json` for orientation before drilling in.
+- Re-scan only when the cached snapshot is stale.
+- Never paste raw JSON back to the user; synthesize 5–10 interesting rows.
+- Never run destructive commands; generate uninstall strings and hand off.
+- Route uninstalls per source: brew → `brew uninstall`, zb → `zb uninstall`, manual `.app` → `osascript` Finder-trash. App Store items have no CLI path — tell the user.
+- Do not suggest uninstalling `/System/Applications/*` or Xcode without confirming.
+
+The skill is one file and one frontmatter block; there is no runtime dependency on Atlas' internals beyond the CLI.
 
 ## Distribution (v0)
 

@@ -1,6 +1,6 @@
 use crate::lenses::Lens;
 use crate::model::{Arch, Kind, SoftwareItem, Source, Status};
-use crate::tui::app::{App, ConfirmPrompt, Mode, Pane};
+use crate::tui::app::{App, ConfirmPrompt, Mode, Pane, SortMode};
 use chrono::{Duration as ChronoDuration, Utc};
 use humansize::{format_size, BINARY};
 use ratatui::{
@@ -91,6 +91,13 @@ fn draw_title(f: &mut Frame, area: Rect, app: &App) {
         spans.push(Span::styled(
             format!("{} outdated", outdated),
             Style::default().fg(WARN),
+        ));
+    }
+    if app.sort != SortMode::None {
+        spans.push(Span::styled("  ·  ", Style::default().fg(MUTED)));
+        spans.push(Span::styled(
+            format!("sort: {}", app.sort.label()),
+            Style::default().fg(ACCENT).italic(),
         ));
     }
     f.render_widget(Line::from(spans), area);
@@ -396,6 +403,7 @@ fn draw_help(f: &mut Frame, area: Rect, app: &App) {
             ("h/l", "pane"),
             ("/ f", "search"),
             ("[ ]", "installer"),
+            ("s", "sort"),
             ("u", "update"),
             ("U", "update all"),
             ("d", "delete"),
@@ -466,9 +474,10 @@ fn draw_help_modal(f: &mut Frame) {
         row("g / G", "top / bottom"),
         row("h / l / tab", "switch pane"),
         Line::raw(""),
-        section("filter"),
+        section("filter & sort"),
         row("/ or f", "search name / bundle id"),
         row("] [", "cycle installer (all → brew → zb → mas → manual)"),
+        row("s", "cycle sort: biggest → longest-ago → recent → most-used → least-used"),
         row("esc", "exit search / clear filter"),
         Line::raw(""),
         section("actions (owner-aware)"),

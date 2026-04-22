@@ -107,6 +107,16 @@ fn run_list(args: &[String]) -> Result<()> {
                 i += 1;
                 opts.filter = args.get(i).cloned();
             }
+            "--sort" => {
+                i += 1;
+                opts.sort = Some(cli::parse_sort(args.get(i).map(String::as_str).unwrap_or(""))?);
+            }
+            "--limit" => {
+                i += 1;
+                opts.limit = args
+                    .get(i)
+                    .and_then(|s| s.parse::<usize>().ok());
+            }
             other => anyhow::bail!("unknown flag: {other}"),
         }
         i += 1;
@@ -141,10 +151,11 @@ fn print_help() {
            atlas scan [--json]               rescan and update the on-disk index\n  \
            atlas export                      emit manifest.json + Brewfile + mas list\n\n\
          agent / script surface (machine-readable):\n  \
-           atlas list [--json] [--lens <l>] [--source <s>] [--filter <q>] [--rescan]\n  \
+           atlas list [--json] [--lens <l>] [--source <s>] [--filter <q>] [--sort <m>] [--limit N]\n  \
            atlas info <name|bundle-id> [--json]\n  \
            atlas doctor [--json]            summary counts & storage\n\n\
          lenses:  all, outdated, duplicates, bloat, stale, rosetta, unsigned\n\
-         sources: brew, zb, mas, nix, pkg, manual\n"
+         sources: brew, zb, mas, nix, pkg, manual\n\
+         sort:    size, old, recent, frequent, rare, none\n"
     );
 }

@@ -155,6 +155,9 @@ fn merge_into(dst: &mut SoftwareItem, src: &mut SoftwareItem) {
     if dst.last_used.is_none() {
         dst.last_used = src.last_used;
     }
+    if dst.use_count.is_none() {
+        dst.use_count = src.use_count;
+    }
     if matches!(dst.arch, crate::model::Arch::Unknown) {
         dst.arch = src.arch;
     }

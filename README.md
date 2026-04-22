@@ -75,6 +75,7 @@ One-keystroke filters over the same inventory.
 | `h` `l` `tab` | switch pane |
 | `/` or `f` | search name · bundle id |
 | `[` `]` | cycle installer filter |
+| `s` | cycle sort — biggest / longest-ago / recent / most-used / least-used |
 | `u` · `U` | update selected · update everything |
 | `d` | delete (via installer, or `.app` to Trash) |
 | `r` · `e` · `?` · `q` | rescan · export · help · quit |
@@ -86,15 +87,21 @@ One-keystroke filters over the same inventory.
 The TUI is for humans. The subcommand surface is for everything else — shell, CI, LLM agents. Strictly read-only, so a hallucinating model can't uninstall anything.
 
 ```sh
-atlas doctor --json                            # totals, counts per source / kind, outdated, storage footprint
-atlas list --lens outdated --json              # every upgradeable item, full records
-atlas list --source brew --filter ripgrep      # plain-text for piping to grep / awk
-atlas info com.apple.dt.Xcode --json           # one item by bundle-id, name, or id
+atlas doctor --json                                     # totals, counts per source / kind, outdated, storage footprint
+atlas list --lens stale --sort size --limit 20 --json   # biggest apps you don't open — top cleanup targets
+atlas list --lens outdated --json                       # every upgradeable item, full records
+atlas list --source brew --filter ripgrep               # plain-text for piping to grep / awk
+atlas info com.apple.dt.Xcode --json                    # one item by bundle-id, name, or id
 ```
 
 Lenses: `all · outdated · duplicates · bloat · stale · rosetta · unsigned`.
 Sources: `brew · zb · mas · nix · pkg · manual`.
+Sort: `size · old · recent · frequent · rare · none`.
 Add `--rescan` to bypass the cached snapshot.
+
+### Agent skill
+
+Drop [`skills/mac-cleanup/SKILL.md`](./skills/mac-cleanup/SKILL.md) into Claude Code, Cursor, or any skill-aware coding agent. It teaches the model when to invoke Atlas, how to synthesize the JSON output into cleanup recommendations, and how to route uninstalls safely (brew, zb, mas, or Finder Trash). Everything stays local.
 
 <br>
 

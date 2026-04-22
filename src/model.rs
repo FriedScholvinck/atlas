@@ -114,6 +114,7 @@ pub struct SoftwareItem {
     pub arch: Arch,
     pub size_bytes: Option<u64>,
     pub last_used: Option<DateTime<Utc>>,
+    pub use_count: Option<u32>,
     pub signed: Option<bool>,
 }
 
@@ -134,6 +135,7 @@ impl SoftwareItem {
             arch: Arch::Unknown,
             size_bytes: None,
             last_used: None,
+            use_count: None,
             signed: None,
         }
     }

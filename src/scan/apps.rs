@@ -98,6 +98,7 @@ fn parse_bundle(path: &Path) -> Result<SoftwareItem> {
 
     let size = dir_size(path);
     let last_used = spotlight_last_used(path);
+    let use_count = spotlight_use_count(path);
 
     let mut item = SoftwareItem::new(name, Kind::App, Source::Manual);
     item.install_path = Some(path.to_path_buf());
@@ -106,6 +107,7 @@ fn parse_bundle(path: &Path) -> Result<SoftwareItem> {
     item.arch = arch;
     item.size_bytes = size;
     item.last_used = last_used;
+    item.use_count = use_count;
     if path.starts_with("/System/Applications") {
         item.source = Source::Manual;
     }
@@ -171,4 +173,20 @@ fn spotlight_last_used(path: &Path) -> Option<DateTime<Utc>> {
     DateTime::parse_from_str(&s, "%Y-%m-%d %H:%M:%S %z")
         .ok()
         .map(|dt| dt.with_timezone(&Utc))
+}
+
+fn spotlight_use_count(path: &Path) -> Option<u32> {
+    let output = Command::new("/usr/bin/mdls")
+        .args(["-raw", "-name", "kMDItemUseCount"])
+        .arg(path)
+        .output()
+        .ok()?;
+    if !output.status.success() {
+        return None;
+    }
+    let s = String::from_utf8_lossy(&output.stdout).trim().to_string();
+    if s.is_empty() || s == "(null)" {
+        return None;
+    }
+    s.parse::<u32>().ok()
 }

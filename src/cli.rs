@@ -2,6 +2,7 @@ use crate::index::{self, Snapshot};
 use crate::lenses::{self, Lens};
 use crate::model::{Source, SoftwareItem};
 use crate::probe::Available;
+use crate::tui::app::{apply_sort, SortMode};
 use anyhow::{Result, bail};
 use serde::Serialize;
 use std::collections::BTreeMap;
@@ -11,24 +12,41 @@ pub struct ListOpts {
     pub lens: Option<Lens>,
     pub source: Option<Source>,
     pub filter: Option<String>,
+    pub sort: Option<SortMode>,
+    pub limit: Option<usize>,
     pub json: bool,
     pub rescan: bool,
 }
 
 pub fn list(opts: ListOpts) -> Result<()> {
     let snap = snapshot(opts.rescan)?;
-    let items = select(&snap, opts.lens, opts.source, opts.filter.as_deref());
+    let mut items = select(&snap, opts.lens, opts.source, opts.filter.as_deref());
+    if let Some(mode) = opts.sort {
+        items = apply_sort(items, mode);
+    }
+    if let Some(n) = opts.limit {
+        items.truncate(n);
+    }
     if opts.json {
-        let refs: Vec<&SoftwareItem> = items;
-        println!("{}", serde_json::to_string_pretty(&refs)?);
+        println!("{}", serde_json::to_string_pretty(&items)?);
     } else {
         for i in items {
+            let size = i
+                .size_bytes
+                .map(|b| humansize::format_size(b, humansize::BINARY))
+                .unwrap_or_default();
+            let last = i
+                .last_used
+                .map(|t| t.format("%Y-%m-%d").to_string())
+                .unwrap_or_default();
             println!(
-                "{:<6} {:<8} {:<40} {}",
+                "{:<6} {:<8} {:<40} {:<14} {:>10}  {}",
                 i.source.label(),
                 i.kind.label(),
                 truncate(&i.name, 40),
                 i.version.as_deref().unwrap_or("-"),
+                size,
+                last,
             );
         }
     }
@@ -233,6 +251,18 @@ pub fn parse_lens(s: &str) -> Result<Lens> {
         "rosetta" => Lens::Rosetta,
         "unsigned" => Lens::Unsigned,
         other => bail!("unknown lens: {other}"),
+    })
+}
+
+pub fn parse_sort(s: &str) -> Result<SortMode> {
+    Ok(match s.to_ascii_lowercase().as_str() {
+        "size" | "biggest" | "size-desc" => SortMode::SizeDesc,
+        "old" | "oldest" | "stale" | "last-used-asc" => SortMode::LastUsedAsc,
+        "recent" | "last-used" | "last-used-desc" => SortMode::LastUsedDesc,
+        "frequent" | "most-used" | "use-desc" => SortMode::UseCountDesc,
+        "rare" | "least-used" | "use-asc" => SortMode::UseCountAsc,
+        "none" => SortMode::None,
+        other => bail!("unknown sort: {other} (try: size, old, recent, frequent, rare)"),
     })
 }
 

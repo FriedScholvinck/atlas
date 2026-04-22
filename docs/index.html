@@ -331,6 +331,61 @@
   .not-col.is li::before { content: "+"; color: var(--accent); font-weight: 700; }
   .not-col.isnot li::before { content: "−"; color: var(--text-muted); font-weight: 700; }
 
+  /* docs section */
+  .docs-h {
+    margin: 32px 0 10px;
+    font-size: 15px;
+    font-weight: 600;
+    letter-spacing: -0.005em;
+    color: var(--text);
+  }
+  .docs-p {
+    margin: 0 0 14px;
+    color: var(--text-dim);
+    font-size: 14px;
+    line-height: 1.65;
+  }
+  .docs-p code, .lens-desc code, .docs-p a code {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12.5px;
+    padding: 1px 6px;
+    border-radius: 5px;
+    background: var(--surface);
+    color: var(--accent);
+    border: 1px solid var(--border);
+  }
+  .keytable {
+    display: grid;
+    grid-template-columns: 220px 1fr;
+    gap: 8px 24px;
+    align-items: center;
+    padding: 14px 0 6px;
+    color: var(--text-dim);
+    font-size: 14px;
+  }
+  .keytable > div:nth-child(odd) {
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    color: var(--text);
+  }
+  @media (max-width: 600px) {
+    .keytable { grid-template-columns: 1fr; gap: 4px; }
+    .keytable > div:nth-child(even) { padding-bottom: 10px; }
+  }
+  kbd {
+    display: inline-block;
+    padding: 1px 7px;
+    border-radius: 6px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-bottom-width: 2px;
+    color: var(--text);
+    font-family: ui-monospace, "SF Mono", Menlo, monospace;
+    font-size: 12px;
+    line-height: 1.3;
+    min-width: 14px;
+    text-align: center;
+  }
+
   /* footer */
   footer {
     border-top: 1px solid var(--border);
@@ -366,6 +421,7 @@
     <div class="links">
       <a href="#install">install</a>
       <a href="#lenses">lenses</a>
+      <a href="#docs">docs</a>
       <a href="https://github.com/FriedScholvinck/atlas" target="_blank" rel="noopener">github</a>
     </div>
   </nav>
@@ -460,6 +516,53 @@ cargo build --release
       <li><span class="lens-name">Rosetta</span><span class="lens-desc">x86_64-only apps running under Rosetta on Apple Silicon.</span></li>
       <li><span class="lens-name">Unsigned</span><span class="lens-desc">Items missing a valid code signature. On-demand probe.</span></li>
     </ul>
+  </section>
+
+  <div class="divider"></div>
+
+  <section class="features" id="docs">
+    <h2>Docs</h2>
+    <p class="lede">Everything you need to drive Atlas from the keyboard or a script. No separate docs site.</p>
+
+    <h3 class="docs-h">Keys</h3>
+    <div class="keytable">
+      <div><kbd>j</kbd> <kbd>k</kbd> · <kbd>g</kbd> <kbd>G</kbd></div><div>nav · top / bottom</div>
+      <div><kbd>h</kbd> <kbd>l</kbd> <kbd>tab</kbd></div><div>switch pane</div>
+      <div><kbd>/</kbd> or <kbd>f</kbd></div><div>search name · bundle id</div>
+      <div><kbd>[</kbd> <kbd>]</kbd></div><div>cycle installer filter</div>
+      <div><kbd>s</kbd></div><div>cycle sort (see below)</div>
+      <div><kbd>u</kbd> · <kbd>U</kbd></div><div>update selected · update everything</div>
+      <div><kbd>d</kbd></div><div>delete via installer — or <code>.app</code> to Trash</div>
+      <div><kbd>r</kbd> · <kbd>e</kbd> · <kbd>?</kbd> · <kbd>q</kbd></div><div>rescan · export · help · quit</div>
+    </div>
+
+    <h3 class="docs-h">Sort modes</h3>
+    <p class="docs-p">Press <kbd>s</kbd> to cycle. Great for cleanup — find the biggest apps, the ones you never open, the ones you live in.</p>
+    <ul class="lens-list">
+      <li><span class="lens-name">biggest</span><span class="lens-desc">Largest on disk first. Fastest way to free GiB.</span></li>
+      <li><span class="lens-name">longest ago</span><span class="lens-desc">Least recently opened first. Surfaces dead weight.</span></li>
+      <li><span class="lens-name">recently used</span><span class="lens-desc">Most recently opened first. Shows what your Mac actually runs.</span></li>
+      <li><span class="lens-name">most used</span><span class="lens-desc">Highest Spotlight use-count — your daily drivers.</span></li>
+      <li><span class="lens-name">least used</span><span class="lens-desc">Never or barely opened. Cleanup candidates.</span></li>
+    </ul>
+
+    <h3 class="docs-h">CLI — for scripts and AI agents</h3>
+    <p class="docs-p">Strictly read-only so a scripted caller can't uninstall anything. Every subcommand accepts <code>--json</code>.</p>
+    <div class="codeblock" style="margin-top:14px;">
+<span class="prompt">$ </span>atlas doctor --json
+<span class="prompt">$ </span>atlas list --lens stale --sort size --limit 20 --json
+<span class="prompt">$ </span>atlas list --source brew --filter ripgrep
+<span class="prompt">$ </span>atlas info com.apple.dt.Xcode --json
+<span class="prompt">$ </span>atlas scan --json            <span style="color:var(--text-muted)"># force a rescan</span>
+    </div>
+    <p class="docs-p">
+      <strong>Lenses:</strong> <code>all · outdated · duplicates · bloat · stale · rosetta · unsigned</code><br>
+      <strong>Sources:</strong> <code>brew · zb · mas · nix · pkg · manual</code><br>
+      <strong>Sort:</strong> <code>size · old · recent · frequent · rare · none</code>
+    </p>
+
+    <h3 class="docs-h">For coding agents</h3>
+    <p class="docs-p">Atlas ships a <a href="https://github.com/FriedScholvinck/atlas/blob/main/skills/mac-cleanup/SKILL.md"><code>mac-cleanup</code> agent skill</a> — a self-contained Markdown file you can drop into Claude Code, Cursor, or any agent framework that understands skills. It teaches the agent when to invoke Atlas, how to synthesize the JSON output, and how to route uninstalls safely.</p>
   </section>
 
   <div class="divider"></div>

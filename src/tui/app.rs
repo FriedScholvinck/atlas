@@ -18,6 +18,38 @@ pub enum Pane {
     Inventory,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum SortMode {
+    None,
+    SizeDesc,
+    LastUsedAsc,
+    LastUsedDesc,
+    UseCountDesc,
+    UseCountAsc,
+}
+
+impl SortMode {
+    pub const ORDER: &'static [SortMode] = &[
+        SortMode::None,
+        SortMode::SizeDesc,
+        SortMode::LastUsedAsc,
+        SortMode::LastUsedDesc,
+        SortMode::UseCountDesc,
+        SortMode::UseCountAsc,
+    ];
+
+    pub fn label(self) -> &'static str {
+        match self {
+            SortMode::None => "—",
+            SortMode::SizeDesc => "biggest",
+            SortMode::LastUsedAsc => "longest ago",
+            SortMode::LastUsedDesc => "recently used",
+            SortMode::UseCountDesc => "most used",
+            SortMode::UseCountAsc => "least used",
+        }
+    }
+}
+
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Mode {
     Normal,
@@ -43,6 +75,7 @@ pub struct App {
     pub list_cursor: usize,
     pub lens_cursor: usize,
     pub source_filter: Option<Source>,
+    pub sort: SortMode,
     pub status: Option<String>,
 
     pending: Option<(u64, Action)>,
@@ -68,6 +101,7 @@ impl App {
             list_cursor: 0,
             lens_cursor: 0,
             source_filter: None,
+            sort: SortMode::None,
             status: None,
             pending: None,
             next_action_id: 0,
@@ -83,21 +117,23 @@ impl App {
                 Some(s) => i.source == s,
             })
             .collect();
-        if self.query.is_empty() {
-            return filtered;
-        }
-        let q = self.query.to_ascii_lowercase();
-        filtered
-            .into_iter()
-            .filter(|i| {
-                i.name.to_ascii_lowercase().contains(&q)
-                    || i.bundle_id
-                        .as_deref()
-                        .map(|b| b.to_ascii_lowercase().contains(&q))
-                        .unwrap_or(false)
-                    || i.source.label().contains(&q)
-            })
-            .collect()
+        let searched: Vec<&SoftwareItem> = if self.query.is_empty() {
+            filtered
+        } else {
+            let q = self.query.to_ascii_lowercase();
+            filtered
+                .into_iter()
+                .filter(|i| {
+                    i.name.to_ascii_lowercase().contains(&q)
+                        || i.bundle_id
+                            .as_deref()
+                            .map(|b| b.to_ascii_lowercase().contains(&q))
+                            .unwrap_or(false)
+                        || i.source.label().contains(&q)
+                })
+                .collect()
+        };
+        apply_sort(searched, self.sort)
     }
 
     pub fn selected(&self) -> Option<&SoftwareItem> {
@@ -113,6 +149,15 @@ impl App {
             Some(Source::Manual) => "manual",
             Some(_) => "other",
         }
+    }
+
+    fn cycle_sort(&mut self) {
+        let idx = SortMode::ORDER
+            .iter()
+            .position(|m| *m == self.sort)
+            .unwrap_or(0);
+        self.sort = SortMode::ORDER[(idx + 1) % SortMode::ORDER.len()];
+        self.list_cursor = 0;
     }
 
     fn cycle_source_filter(&mut self, forward: bool) {
@@ -152,6 +197,50 @@ impl App {
             action_id: id,
         });
     }
+}
+
+pub fn apply_sort<'a>(items: Vec<&'a SoftwareItem>, mode: SortMode) -> Vec<&'a SoftwareItem> {
+    let mut out = items;
+    // None sorts go to the bottom for every mode, so the "live" data is always on top.
+    match mode {
+        SortMode::None => {}
+        SortMode::SizeDesc => {
+            out.sort_by(|a, b| b.size_bytes.unwrap_or(0).cmp(&a.size_bytes.unwrap_or(0)));
+        }
+        SortMode::LastUsedAsc => {
+            out.sort_by(|a, b| match (a.last_used, b.last_used) {
+                (Some(x), Some(y)) => x.cmp(&y),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
+        }
+        SortMode::LastUsedDesc => {
+            out.sort_by(|a, b| match (a.last_used, b.last_used) {
+                (Some(x), Some(y)) => y.cmp(&x),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
+        }
+        SortMode::UseCountDesc => {
+            out.sort_by(|a, b| match (a.use_count, b.use_count) {
+                (Some(x), Some(y)) => y.cmp(&x),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
+        }
+        SortMode::UseCountAsc => {
+            out.sort_by(|a, b| match (a.use_count, b.use_count) {
+                (Some(x), Some(y)) => x.cmp(&y),
+                (Some(_), None) => std::cmp::Ordering::Less,
+                (None, Some(_)) => std::cmp::Ordering::Greater,
+                (None, None) => std::cmp::Ordering::Equal,
+            });
+        }
+    }
+    out
 }
 
 pub fn run(snapshot: Snapshot) -> Result<()> {
@@ -236,6 +325,10 @@ fn handle_normal<B: Backend + io::Write>(
         }
         (KeyCode::Char(']'), _) => app.cycle_source_filter(true),
         (KeyCode::Char('['), _) => app.cycle_source_filter(false),
+        (KeyCode::Char('s'), _) => {
+            app.cycle_sort();
+            app.status = Some(format!("sort: {}", app.sort.label()));
+        }
         (KeyCode::Tab, _) | (KeyCode::Char('h'), _) | (KeyCode::Char('l'), _) => {
             app.pane = match app.pane {
                 Pane::Lenses => Pane::Inventory,
