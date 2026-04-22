@@ -107,11 +107,11 @@ Drop [`skills/mac-cleanup/SKILL.md`](./skills/mac-cleanup/SKILL.md) into Claude 
 
 ## Design
 
-Rolling design doc and decision log: [`initial-spec.md`](./initial-spec.md).
-
 - Merge engine dedupes by bundle id → install path → (kind, name).
 - Source preference ranks `zb > mas > brew > nix > pkg > manual`.
 - Snapshot cached at `~/Library/Application Support/dev.atlas.Atlas/index.json` as plain JSON — no SQLite, no daemon.
+
+Coding agents working in this repo: read [`AGENTS.md`](./AGENTS.md) first.
 
 <br>
 
