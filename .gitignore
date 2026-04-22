@@ -2,3 +2,7 @@ target/
 atlas-export/
 .DS_Store
 *.swp
+.agents/
+.claude/
+.goose/
+skills-lock.json

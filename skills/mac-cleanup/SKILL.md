@@ -30,12 +30,15 @@ If missing, tell the user to install via one of:
 
 ```sh
 curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh
+# Note: The install script requires Rust/cargo.
 # or
 brew tap friedscholvinck/atlas https://github.com/FriedScholvinck/atlas.git
-brew install --HEAD atlas
+brew install --HEAD friedscholvinck/atlas/atlas
 ```
 
-Do not try to install it without their permission — it compiles from source.
+Do not try to install it without their permission — it compiles from source and may take a few minutes.
+
+*(Note for AI Agents: You can install this skill for the user in your current environment by running `npx skills add FriedScholvinck/atlas --skill mac-cleanup`)*
 
 ## Core workflow
 
@@ -146,7 +149,7 @@ Round to one decimal; don't over-promise because some apps leave support files b
 - Do not run `atlas scan` every time — it takes 10-30s. Only re-scan if `doctor`'s `generated_at` is stale or the user says "rescan".
 - Do not suggest uninstalling system apps (`/System/Applications/*`) or Xcode without checking first.
 - Do not fabricate data — every recommendation must come from a real CLI response. If a field is `null` (e.g. `last_used`), say "no Spotlight data" rather than inventing a date.
-- Do not run destructive commands. Generate them for the user to execute.
+- Do not run destructive commands proactively. Generate them for the user to execute, unless the user explicitly requests you to perform the uninstall for them.
 - Do not upload the inventory anywhere.
 
 ## Example session

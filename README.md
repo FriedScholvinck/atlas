@@ -35,7 +35,7 @@ curl -fsSL https://friedscholvinck.github.io/atlas/install.sh | sh
 
 # homebrew (HEAD tap until the first release is cut)
 brew tap friedscholvinck/atlas https://github.com/FriedScholvinck/atlas.git
-brew install --HEAD atlas
+brew install --HEAD friedscholvinck/atlas/atlas
 ```
 
 Requires macOS 13+. v0 builds from source via a working Rust toolchain; signed prebuilt binaries land with the first tagged release.
