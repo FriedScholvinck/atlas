@@ -22,6 +22,10 @@ fn main() -> Result<()> {
         "list" => run_list(&args[1..]),
         "info" => run_info(&args[1..]),
         "doctor" => run_doctor(&args[1..]),
+        "--version" | "-V" | "-v" | "version" => {
+            println!("atlas {}", env!("CARGO_PKG_VERSION"));
+            Ok(())
+        }
         "--help" | "-h" | "help" => {
             print_help();
             Ok(())
@@ -152,7 +156,7 @@ fn run_doctor(args: &[String]) -> Result<()> {
 
 fn print_help() {
     println!(
-        "atlas — local software graph for your Mac\n\n\
+        "atlas {} — local software graph for your Mac\n\n\
          usage:\n  \
            atlas tui                         launch the interactive TUI (default)\n  \
            atlas scan [--json]               rescan and update the on-disk index\n  \
@@ -163,6 +167,7 @@ fn print_help() {
            atlas doctor [--json]            summary counts & storage\n\n\
          lenses:  all, outdated, duplicates, bloat, stale, rosetta, unsigned\n\
          sources: brew, zb, mas, manual, npm, cargo, pipx, uv\n\
-         sort:    size, old, recent, frequent, rare, none\n"
+         sort:    size, old, recent, frequent, rare, none\n",
+        env!("CARGO_PKG_VERSION")
     );
 }

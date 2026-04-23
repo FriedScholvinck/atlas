@@ -5,7 +5,7 @@ description: Use this skill when the user wants to clean up their Mac — free d
 
 # Mac Cleanup with Atlas
 
-Atlas is a local macOS tool that builds a unified inventory of everything installed — `.app` bundles, Homebrew formulas and casks, zerobrew, and App Store apps — and exposes it as a read-only JSON CLI. Use it to help the user audit and clean up their machine without ever uploading their software list.
+Atlas is a local macOS tool that builds a unified inventory of everything installed — `.app` bundles, Homebrew formulas and casks, zerobrew, App Store apps, and global tools (npm, pipx, uv, cargo) — and exposes it as a read-only JSON CLI. Use it to help the user audit and clean up their machine without ever uploading their software list.
 
 ## When to use this skill
 
@@ -54,16 +54,35 @@ Sample response shape:
 
 ```json
 {
-  "generated_at": "2026-04-22T10:01:16Z",
-  "total": 427,
-  "by_source": { "brew": 194, "manual": 193, "zb": 40 },
-  "by_kind":   { "app": 193, "cask": 12, "formula": 222 },
-  "outdated": 74,
+  "total": 440,
+  "by_source": {
+    "manual": 182,
+    "brew": 200,
+    "zb": 40,
+    "mas": 0,
+    "npm": 13,
+    "pipx": 1,
+    "uv": 4
+  },
+  "by_kind": {
+    "app": 182,
+    "cli": 18,
+    "cask": 11,
+    "formula": 229
+  },
+  "total_size_bytes": 76044567714,
+  "stale": 26,
   "duplicates": 6,
-  "rosetta": 79,
-  "stale": 36,
-  "total_size_bytes": 83150000000,
-  "installers_available": ["brew", "zb"]
+  "rosetta": 76,
+  "outdated": 71,
+  "installers_available": [
+    "brew",
+    "zb",
+    "npm",
+    "pipx",
+    "uv"
+  ],
+  "generated_at": "2026-04-23T09:37:19.715Z"
 }
 ```
 
@@ -98,8 +117,11 @@ The CLI is read-only by design. When the user decides to uninstall something, ge
 |---|---|
 | `brew` | `brew uninstall <name>` (formula) or `brew uninstall --cask <name>` |
 | `zerobrew` | `zb uninstall <name>` |
-| `app_store` | App Store uninstalls via Launchpad — tell the user (no CLI path) |
+| `mas` / `appstore` | App Store uninstalls via Launchpad — tell the user (no CLI path) |
 | `manual` | Move `.app` to Trash: `osascript -e 'tell application "Finder" to delete POSIX file "<install_path>"'` |
+| `npm` | `npm uninstall -g <name>` |
+| `pipx` | `pipx uninstall <name>` |
+| `uv` | `uv tool uninstall <name>` |
 
 Always show the exact command and wait for the user to run it. Never chain uninstalls without confirmation. For manual `.app` bundles, prefer the Finder-trash route over `rm -rf` — reversible, and some apps leave LaunchAgents behind that need a separate cleanup.
 
