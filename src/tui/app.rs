@@ -82,17 +82,6 @@ pub struct App {
     next_action_id: u64,
 }
 
-const SOURCE_CYCLE: &[Option<Source>] = &[
-    None,
-    Some(Source::Brew),
-    Some(Source::Zerobrew),
-    Some(Source::AppStore),
-    Some(Source::Npm),
-    Some(Source::Pipx),
-    Some(Source::Uv),
-    Some(Source::Manual),
-];
-
 impl App {
     pub fn new(snapshot: Snapshot) -> Self {
         Self {
@@ -168,13 +157,35 @@ impl App {
     }
 
     fn cycle_source_filter(&mut self, forward: bool) {
-        let len = SOURCE_CYCLE.len();
-        let idx = SOURCE_CYCLE
+        let a = &self.snapshot.available;
+        let mut cycle = vec![None];
+        if a.zb {
+            cycle.push(Some(Source::Zerobrew));
+        }
+        if a.brew {
+            cycle.push(Some(Source::Brew));
+        }
+        if a.mas {
+            cycle.push(Some(Source::AppStore));
+        }
+        if a.npm {
+            cycle.push(Some(Source::Npm));
+        }
+        if a.pipx {
+            cycle.push(Some(Source::Pipx));
+        }
+        if a.uv {
+            cycle.push(Some(Source::Uv));
+        }
+        cycle.push(Some(Source::Manual));
+
+        let len = cycle.len();
+        let idx = cycle
             .iter()
             .position(|s| *s == self.source_filter)
             .unwrap_or(0);
         let next = if forward { idx + 1 } else { idx + len - 1 };
-        self.source_filter = SOURCE_CYCLE[next % len];
+        self.source_filter = cycle[next % len];
         self.list_cursor = 0;
     }
 
