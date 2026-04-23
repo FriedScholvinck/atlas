@@ -87,6 +87,10 @@ const SOURCE_CYCLE: &[Option<Source>] = &[
     Some(Source::Brew),
     Some(Source::Zerobrew),
     Some(Source::AppStore),
+    Some(Source::Npm),
+    Some(Source::Pipx),
+    Some(Source::Uv),
+    Some(Source::Cargo),
     Some(Source::Manual),
 ];
 
@@ -146,6 +150,10 @@ impl App {
             Some(Source::Brew) => "brew",
             Some(Source::Zerobrew) => "zb",
             Some(Source::AppStore) => "mas",
+            Some(Source::Npm) => "npm",
+            Some(Source::Pipx) => "pipx",
+            Some(Source::Uv) => "uv",
+            Some(Source::Cargo) => "cargo",
             Some(Source::Manual) => "manual",
             Some(_) => "other",
         }
