@@ -35,7 +35,7 @@ Formula/         Homebrew tap
 ## Conventions
 
 - **Adapters activate at runtime.** `probe::Available::detect()` is the gate — never call `brew` / `zb` / `mas` unconditionally.
-- **Source preference is `zb > mas > brew > nix > pkg > manual`.** Merge logic in `src/index.rs` relies on this ordering. Preserve it unless you genuinely intend to change attribution.
+- **Source preference is `zb > mas > brew > npm > pipx > uv > manual`.** Merge logic in `src/index.rs` relies on this ordering. Preserve it unless you genuinely intend to change attribution.
 - **Snapshot is in-memory `Vec<SoftwareItem>` + JSON on disk.** No SQLite, no migrations. If you find yourself reaching for a DB, stop and justify it.
 - **Actions are source-routed.** `brew uninstall`, `zb uninstall`, App Store has no CLI path, manual `.app` → Finder Trash via `osascript`. Never `rm -rf` an app bundle.
 - **CLI is strictly read-only** (`list` / `info` / `doctor`). Destructive verbs live in the TUI only, so scripted agents cannot uninstall.

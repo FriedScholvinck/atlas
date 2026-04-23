@@ -199,13 +199,13 @@ impl App {
     }
 }
 
-pub fn apply_sort<'a>(items: Vec<&'a SoftwareItem>, mode: SortMode) -> Vec<&'a SoftwareItem> {
+pub fn apply_sort(items: Vec<&SoftwareItem>, mode: SortMode) -> Vec<&SoftwareItem> {
     let mut out = items;
     // None sorts go to the bottom for every mode, so the "live" data is always on top.
     match mode {
         SortMode::None => {}
         SortMode::SizeDesc => {
-            out.sort_by(|a, b| b.size_bytes.unwrap_or(0).cmp(&a.size_bytes.unwrap_or(0)));
+            out.sort_by_key(|b| std::cmp::Reverse(b.size_bytes.unwrap_or(0)));
         }
         SortMode::LastUsedAsc => {
             out.sort_by(|a, b| match (a.last_used, b.last_used) {
@@ -378,8 +378,10 @@ fn handle_normal<B: Backend + io::Write>(
                 match actions::delete_for(&item, &available) {
                     Some(a) => app.queue_action(a),
                     None => {
-                        app.status =
-                            Some(format!("no delete path for source '{}'", item.source.label()));
+                        app.status = Some(format!(
+                            "no delete path for source '{}'",
+                            item.source.label()
+                        ));
                     }
                 }
             }
@@ -390,8 +392,10 @@ fn handle_normal<B: Backend + io::Write>(
                 match actions::update_for(&item, &available) {
                     Some(a) => app.queue_action(a),
                     None => {
-                        app.status =
-                            Some(format!("no update path for source '{}'", item.source.label()));
+                        app.status = Some(format!(
+                            "no update path for source '{}'",
+                            item.source.label()
+                        ));
                     }
                 }
             }

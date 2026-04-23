@@ -36,8 +36,6 @@ pub enum Source {
     AppStore,
     Brew,
     Zerobrew,
-    Nix,
-    Pkg,
     Manual,
     Npm,
     Cargo,
@@ -54,8 +52,6 @@ impl Source {
             Source::AppStore => "mas",
             Source::Brew => "brew",
             Source::Zerobrew => "zb",
-            Source::Nix => "nix",
-            Source::Pkg => "pkg",
             Source::Manual => "manual",
             Source::Npm => "npm",
             Source::Cargo => "cargo",
@@ -143,5 +139,28 @@ impl SoftwareItem {
     pub fn is_outdated(&self) -> bool {
         matches!(self.status, Status::Outdated)
             || matches!((&self.version, &self.latest_version), (Some(v), Some(l)) if v != l)
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_software_item_new() {
+        let item = SoftwareItem::new("my-tool", Kind::Cli, Source::Npm);
+        assert_eq!(item.name, "my-tool");
+        assert_eq!(item.id, "npm:my-tool");
+        assert_eq!(item.kind, Kind::Cli);
+        assert_eq!(item.source, Source::Npm);
+        assert_eq!(item.status, Status::Installed);
+        assert!(!item.is_outdated());
+    }
+
+    #[test]
+    fn test_software_item_outdated() {
+        let mut item = SoftwareItem::new("old-tool", Kind::App, Source::Brew);
+        item.status = Status::Outdated;
+        assert!(item.is_outdated());
     }
 }

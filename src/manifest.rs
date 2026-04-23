@@ -37,9 +37,7 @@ fn build_brewfile(snap: &Snapshot) -> String {
     let mut formulas: Vec<&str> = snap
         .items
         .iter()
-        .filter(|i| {
-            matches!(i.source, Source::Brew | Source::Zerobrew) && i.kind == Kind::Formula
-        })
+        .filter(|i| matches!(i.source, Source::Brew | Source::Zerobrew) && i.kind == Kind::Formula)
         .map(|i| i.name.as_str())
         .collect();
     let mut casks: Vec<&str> = snap

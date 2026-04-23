@@ -17,7 +17,9 @@ pub struct Available {
     pub brew: Option<PathBuf>,
     pub zb: Option<PathBuf>,
     pub mas: Option<PathBuf>,
-    pub nix: Option<PathBuf>,
+    pub npm: Option<PathBuf>,
+    pub pipx: Option<PathBuf>,
+    pub uv: Option<PathBuf>,
 }
 
 impl Available {
@@ -26,7 +28,9 @@ impl Available {
             brew: which("brew"),
             zb: which("zb"),
             mas: which("mas"),
-            nix: which("nix"),
+            npm: which("npm"),
+            pipx: which("pipx"),
+            uv: which("uv"),
         }
     }
 
@@ -41,8 +45,14 @@ impl Available {
         if self.mas.is_some() {
             parts.push("mas");
         }
-        if self.nix.is_some() {
-            parts.push("nix");
+        if self.npm.is_some() {
+            parts.push("npm");
+        }
+        if self.pipx.is_some() {
+            parts.push("pipx");
+        }
+        if self.uv.is_some() {
+            parts.push("uv");
         }
         if parts.is_empty() {
             "none".into()

@@ -1,9 +1,9 @@
 use crate::index::{self, Snapshot};
 use crate::lenses::{self, Lens};
-use crate::model::{Source, SoftwareItem};
+use crate::model::{SoftwareItem, Source};
 use crate::probe::Available;
 use crate::tui::app::{apply_sort, SortMode};
-use anyhow::{Result, bail};
+use anyhow::{bail, Result};
 use serde::Serialize;
 use std::collections::BTreeMap;
 
@@ -149,7 +149,10 @@ fn print_human(i: &SoftwareItem) {
     }
     println!("arch      {}", i.arch.label());
     if let Some(sz) = i.size_bytes {
-        println!("size      {}", humansize::format_size(sz, humansize::BINARY));
+        println!(
+            "size      {}",
+            humansize::format_size(sz, humansize::BINARY)
+        );
     }
     if let Some(t) = i.last_used {
         println!("last_used {}", t.to_rfc3339());
@@ -203,8 +206,14 @@ impl Report {
         if snap.available.mas {
             installers.push("mas".into());
         }
-        if snap.available.nix {
-            installers.push("nix".into());
+        if snap.available.npm {
+            installers.push("npm".into());
+        }
+        if snap.available.pipx {
+            installers.push("pipx".into());
+        }
+        if snap.available.uv {
+            installers.push("uv".into());
         }
         Report {
             generated_at: snap.generated_at.to_rfc3339(),
@@ -271,8 +280,10 @@ pub fn parse_source(s: &str) -> Result<Source> {
         "mas" | "appstore" => Source::AppStore,
         "brew" => Source::Brew,
         "zb" | "zerobrew" => Source::Zerobrew,
-        "nix" => Source::Nix,
-        "pkg" => Source::Pkg,
+        "npm" => Source::Npm,
+        "cargo" => Source::Cargo,
+        "pipx" => Source::Pipx,
+        "uv" => Source::Uv,
         "manual" | "app" => Source::Manual,
         other => bail!("unknown source: {other}"),
     })

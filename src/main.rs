@@ -39,7 +39,10 @@ fn run_tui() -> Result<()> {
     let snapshot = match index::load() {
         Some(snap) => snap,
         None => {
-            eprintln!("no cached index — scanning (installers: {})…", available.summary());
+            eprintln!(
+                "no cached index — scanning (installers: {})…",
+                available.summary()
+            );
             let snap = index::scan_all(&available)?;
             let _ = index::save(&snap);
             snap
@@ -78,8 +81,8 @@ fn run_scan(args: &[String]) -> Result<()> {
 }
 
 fn run_export() -> Result<()> {
-    let snap = index::load()
-        .ok_or_else(|| anyhow::anyhow!("no snapshot yet — run `atlas scan` first"))?;
+    let snap =
+        index::load().ok_or_else(|| anyhow::anyhow!("no snapshot yet — run `atlas scan` first"))?;
     let paths = manifest::export_all(&snap)?;
     for p in paths {
         println!("wrote {p}");
@@ -96,12 +99,15 @@ fn run_list(args: &[String]) -> Result<()> {
             "--rescan" => opts.rescan = true,
             "--lens" => {
                 i += 1;
-                opts.lens = Some(cli::parse_lens(args.get(i).map(String::as_str).unwrap_or(""))?);
+                opts.lens = Some(cli::parse_lens(
+                    args.get(i).map(String::as_str).unwrap_or(""),
+                )?);
             }
             "--source" => {
                 i += 1;
-                opts.source =
-                    Some(cli::parse_source(args.get(i).map(String::as_str).unwrap_or(""))?);
+                opts.source = Some(cli::parse_source(
+                    args.get(i).map(String::as_str).unwrap_or(""),
+                )?);
             }
             "--filter" => {
                 i += 1;
@@ -109,13 +115,13 @@ fn run_list(args: &[String]) -> Result<()> {
             }
             "--sort" => {
                 i += 1;
-                opts.sort = Some(cli::parse_sort(args.get(i).map(String::as_str).unwrap_or(""))?);
+                opts.sort = Some(cli::parse_sort(
+                    args.get(i).map(String::as_str).unwrap_or(""),
+                )?);
             }
             "--limit" => {
                 i += 1;
-                opts.limit = args
-                    .get(i)
-                    .and_then(|s| s.parse::<usize>().ok());
+                opts.limit = args.get(i).and_then(|s| s.parse::<usize>().ok());
             }
             other => anyhow::bail!("unknown flag: {other}"),
         }
@@ -134,7 +140,8 @@ fn run_info(args: &[String]) -> Result<()> {
             query = Some(a);
         }
     }
-    let query = query.ok_or_else(|| anyhow::anyhow!("usage: atlas info <name|bundle-id> [--json]"))?;
+    let query =
+        query.ok_or_else(|| anyhow::anyhow!("usage: atlas info <name|bundle-id> [--json]"))?;
     cli::info(query, json)
 }
 
@@ -155,7 +162,7 @@ fn print_help() {
            atlas info <name|bundle-id> [--json]\n  \
            atlas doctor [--json]            summary counts & storage\n\n\
          lenses:  all, outdated, duplicates, bloat, stale, rosetta, unsigned\n\
-         sources: brew, zb, mas, nix, pkg, manual\n\
+         sources: brew, zb, mas, manual, npm, cargo, pipx, uv\n\
          sort:    size, old, recent, frequent, rare, none\n"
     );
 }

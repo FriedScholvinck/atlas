@@ -115,8 +115,8 @@ fn parse_bundle(path: &Path) -> Result<SoftwareItem> {
 }
 
 fn arch_from_labels(labels: &[&str]) -> Arch {
-    let has_arm = labels.iter().any(|s| *s == "arm64");
-    let has_x86 = labels.iter().any(|s| *s == "x86_64");
+    let has_arm = labels.contains(&"arm64");
+    let has_x86 = labels.contains(&"x86_64");
     match (has_arm, has_x86) {
         (true, true) => Arch::Universal,
         (true, false) => Arch::Arm64,
@@ -133,7 +133,11 @@ fn probe_arch_via_lipo(bundle: &Path, executable: Option<&str>) -> Arch {
     if !exe_path.exists() {
         return Arch::Unknown;
     }
-    let Ok(output) = Command::new("/usr/bin/lipo").arg("-archs").arg(&exe_path).output() else {
+    let Ok(output) = Command::new("/usr/bin/lipo")
+        .arg("-archs")
+        .arg(&exe_path)
+        .output()
+    else {
         return Arch::Unknown;
     };
     if !output.status.success() {
@@ -153,7 +157,11 @@ fn dir_size(path: &Path) -> Option<u64> {
             }
         }
     }
-    if total == 0 { None } else { Some(total) }
+    if total == 0 {
+        None
+    } else {
+        Some(total)
+    }
 }
 
 fn spotlight_last_used(path: &Path) -> Option<DateTime<Utc>> {

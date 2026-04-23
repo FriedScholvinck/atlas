@@ -91,7 +91,7 @@ pub fn delete_for(item: &SoftwareItem, av: &Available) -> Option<Action> {
             name: item.name.clone(),
             cmd: trash_cmd(p),
         }),
-        _ => None, // AppStore needs sudo; nix/lang managers deferred.
+        _ => None, // AppStore needs sudo; lang managers deferred.
     }
 }
 

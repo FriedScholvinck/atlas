@@ -18,7 +18,7 @@ One unified view of every `.app`, formula, cask, and App Store install — with 
 
 ## Why
 
-Every Mac accumulates software from five or six different installers — Homebrew, zerobrew, the App Store, `.pkg` files, manual `.app` drops, vendor updaters. Nothing tells you the complete picture in one place. Atlas does, locally, in under two seconds.
+Every Mac accumulates software from five or six different installers — Homebrew, zerobrew, the App Store, global npm/pipx packages, manual `.app` drops, vendor updaters. Nothing tells you the complete picture in one place. Atlas does, locally, in under two seconds.
 
 - **One row per thing**, not per installer. A formula present in both brew and zerobrew collapses into a single row attributed to whichever you actually use.
 - **Provenance, not guesses.** Bundle id, install path, arch (arm64 / x86_64 / universal), size on disk, last-used date — all resolved from the local filesystem and Spotlight.
@@ -95,7 +95,7 @@ atlas info com.apple.dt.Xcode --json                    # one item by bundle-id,
 ```
 
 Lenses: `all · outdated · duplicates · bloat · stale · rosetta · unsigned`.
-Sources: `brew · zb · mas · nix · pkg · manual`.
+Sources: `brew · zb · mas · manual · npm · pipx · uv`.
 Sort: `size · old · recent · frequent · rare · none`.
 Add `--rescan` to bypass the cached snapshot.
 
@@ -105,10 +105,19 @@ Drop [`skills/mac-cleanup/SKILL.md`](./skills/mac-cleanup/SKILL.md) into Claude 
 
 <br>
 
+## Roadmap
+
+Atlas provides the perfect foundation for cleaning up your Mac, but there's always more to track:
+- **Scan locally installed Agent Skills:** The AI era comes with an explosion of locally installed agent skills. We plan to identify installed skills across tools like Claude Code and Goose.
+- **Support for more global tools:** Cargo, Gem, and Go.
+- **Uninstaller safety:** Providing safe, isolated uninstall flows for various global CLI tools.
+
+<br>
+
 ## Design
 
 - Merge engine dedupes by bundle id → install path → (kind, name).
-- Source preference ranks `zb > mas > brew > nix > pkg > manual`.
+- Source preference ranks `zb > mas > brew > npm > pipx > uv > manual`.
 - Snapshot cached at `~/Library/Application Support/dev.atlas.Atlas/index.json` as plain JSON — no SQLite, no daemon.
 
 Coding agents working in this repo: read [`AGENTS.md`](./AGENTS.md) first.

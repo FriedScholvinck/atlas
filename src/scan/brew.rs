@@ -11,7 +11,13 @@ pub fn scan(exe: &Path) -> Result<Vec<SoftwareItem>> {
 pub fn scan_as(exe: &Path, source: Source) -> Result<Vec<SoftwareItem>> {
     let outdated = outdated_set(exe);
     let mut items = vec![];
-    items.extend(list_kind(exe, "--formula", Kind::Formula, source, &outdated));
+    items.extend(list_kind(
+        exe,
+        "--formula",
+        Kind::Formula,
+        source,
+        &outdated,
+    ));
     items.extend(list_kind(exe, "--cask", Kind::Cask, source, &outdated));
     Ok(items)
 }

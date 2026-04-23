@@ -462,7 +462,7 @@
       <div class="card">
         <div class="icon">◆</div>
         <h3>Provenance, not guesses</h3>
-        <p>Every row carries its real source: brew, zerobrew, mas, pkg, or manual. Bundle id, path, arch, size, and last-used date all resolved locally ・ no cloud, no account.</p>
+        <p>Every row carries its real source: brew, zerobrew, mas, npm, pipx, uv, or manual. Bundle id, path, arch, size, and last-used date all resolved locally ・ no cloud, no account.</p>
       </div>
       <div class="card">
         <div class="icon">⟳</div>
@@ -561,12 +561,12 @@ cargo build --release
     </div>
     <p class="docs-p">
       <strong>Lenses:</strong> <code>all · outdated · duplicates · bloat · stale · rosetta · unsigned</code><br>
-      <strong>Sources:</strong> <code>brew · zb · mas · nix · pkg · manual</code><br>
+      <strong>Sources:</strong> <code>brew · zb · mas · manual · npm · pipx · uv · cargo</code><br>
       <strong>Sort:</strong> <code>size · old · recent · frequent · rare · none</code>
     </p>
 
     <h3 class="docs-h">For coding agents</h3>
-    <p class="docs-p">Atlas ships a <code>mac-cleanup</code> skill ・ a self-contained Markdown file you can drop into Claude Code, Cursor, or any skill-aware agent. It teaches the agent when to invoke Atlas, how to synthesize the JSON output, and how to route uninstalls safely.</p>
+    <p class="docs-p">Atlas ships a <code>mac-cleanup</code> skill ・ a self-contained markdown file you can drop into Claude Code, Cursor, or any skill-aware agent. It teaches the agent when to invoke Atlas, how to synthesize the JSON output, and how to route uninstalls safely.</p>
     <p class="docs-p" style="margin-top:6px;">
       <a href="./skills/mac-cleanup.html" class="btn primary" style="padding:10px 16px;font-weight:500;border-radius:var(--radius);text-decoration:none;display:inline-flex;gap:8px;align-items:center;">→ Install the mac-cleanup skill</a>
       &nbsp;
@@ -592,7 +592,7 @@ cargo build --release
       <div class="not-col isnot">
         <h4>what it is not</h4>
         <ul>
-          <li>A replacement for Homebrew, Nix, or the App Store.</li>
+          <li>A replacement for Homebrew, or the App Store.</li>
           <li>An MDM, kernel extension, or policy engine.</li>
           <li>A cloud service. Everything stays local.</li>
           <li>A background daemon. Launch it when you need it.</li>

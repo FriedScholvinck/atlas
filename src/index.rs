@@ -1,4 +1,4 @@
-use crate::model::{Source, SoftwareItem};
+use crate::model::{SoftwareItem, Source};
 use crate::probe::Available;
 use crate::scan;
 use anyhow::{Context, Result};
@@ -20,7 +20,9 @@ pub struct AvailableSummary {
     pub brew: bool,
     pub zb: bool,
     pub mas: bool,
-    pub nix: bool,
+    pub npm: bool,
+    pub pipx: bool,
+    pub uv: bool,
 }
 
 impl From<&Available> for AvailableSummary {
@@ -29,7 +31,9 @@ impl From<&Available> for AvailableSummary {
             brew: a.brew.is_some(),
             zb: a.zb.is_some(),
             mas: a.mas.is_some(),
-            nix: a.nix.is_some(),
+            npm: a.npm.is_some(),
+            pipx: a.pipx.is_some(),
+            uv: a.uv.is_some(),
         }
     }
 }
@@ -68,6 +72,21 @@ pub fn scan_all(available: &Available) -> Result<Snapshot> {
     }
     if let Some(mas_exe) = &available.mas {
         items.extend(scan::mas::scan(mas_exe)?);
+    }
+    if let Some(npm_exe) = &available.npm {
+        if let Ok(npm_items) = scan::npm::scan(npm_exe) {
+            items.extend(npm_items);
+        }
+    }
+    if let Some(pipx_exe) = &available.pipx {
+        if let Ok(pipx_items) = scan::pipx::scan(pipx_exe) {
+            items.extend(pipx_items);
+        }
+    }
+    if let Some(uv_exe) = &available.uv {
+        if let Ok(uv_items) = scan::uv::scan(uv_exe) {
+            items.extend(uv_items);
+        }
     }
 
     let merged = merge(items);
@@ -171,10 +190,40 @@ fn prefer_source(a: Source, b: Source) -> Source {
         Source::Zerobrew => 0,
         Source::AppStore => 1,
         Source::Brew => 2,
-        Source::Nix => 3,
-        Source::Pkg => 4,
-        Source::Manual => 5,
-        _ => 6,
+        Source::Npm => 3,
+        Source::Pipx => 4,
+        Source::Uv => 5,
+        Source::Cargo => 6,
+        Source::Manual => 7,
+        _ => 8,
     };
-    if rank(a) <= rank(b) { a } else { b }
+    if rank(a) <= rank(b) {
+        a
+    } else {
+        b
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::model::Source;
+
+    #[test]
+    fn test_prefer_source() {
+        assert_eq!(
+            prefer_source(Source::Zerobrew, Source::Brew),
+            Source::Zerobrew
+        );
+        assert_eq!(
+            prefer_source(Source::Brew, Source::Zerobrew),
+            Source::Zerobrew
+        );
+        assert_eq!(
+            prefer_source(Source::AppStore, Source::Manual),
+            Source::AppStore
+        );
+        assert_eq!(prefer_source(Source::Manual, Source::Npm), Source::Npm);
+        assert_eq!(prefer_source(Source::Pipx, Source::Uv), Source::Pipx);
+    }
 }

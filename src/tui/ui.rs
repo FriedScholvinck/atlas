@@ -62,8 +62,14 @@ fn draw_title(f: &mut Frame, area: Rect, app: &App) {
         if a.mas {
             on.push("mas");
         }
-        if a.nix {
-            on.push("nix");
+        if a.npm {
+            on.push("npm");
+        }
+        if a.pipx {
+            on.push("pipx");
+        }
+        if a.uv {
+            on.push("uv");
         }
         if on.is_empty() {
             "none".into()
@@ -75,7 +81,10 @@ fn draw_title(f: &mut Frame, area: Rect, app: &App) {
     let mut spans = vec![
         Span::styled("atlas", Style::default().fg(ACCENT).bold()),
         Span::styled("  ·  ", Style::default().fg(MUTED)),
-        Span::styled(format!("{} items", app.snapshot.items.len()), Style::default().fg(DIM)),
+        Span::styled(
+            format!("{} items", app.snapshot.items.len()),
+            Style::default().fg(DIM),
+        ),
         Span::styled("  ·  ", Style::default().fg(MUTED)),
         Span::styled(installers, Style::default().fg(DIM)),
     ];
@@ -152,7 +161,9 @@ fn draw_lenses(f: &mut Frame, area: Rect, app: &App) {
                 Span::raw(UNFOCUS_PAD)
             };
             let title_style = if selected {
-                Style::default().fg(if focused { ACCENT } else { DIM }).bold()
+                Style::default()
+                    .fg(if focused { ACCENT } else { DIM })
+                    .bold()
             } else {
                 Style::default().fg(DIM)
             };
@@ -187,7 +198,9 @@ fn draw_inventory(f: &mut Frame, area: Rect, app: &App) {
             Span::styled(&app.query, Style::default().fg(Color::White)),
             Span::styled(
                 "▏",
-                Style::default().fg(ACCENT).add_modifier(Modifier::SLOW_BLINK),
+                Style::default()
+                    .fg(ACCENT)
+                    .add_modifier(Modifier::SLOW_BLINK),
             ),
         ])
     } else if !app.query.is_empty() {
@@ -477,7 +490,10 @@ fn draw_help_modal(f: &mut Frame) {
         section("filter & sort"),
         row("/ or f", "search name / bundle id"),
         row("] [", "cycle installer (all → brew → zb → mas → manual)"),
-        row("s", "cycle sort: biggest → longest-ago → recent → most-used → least-used"),
+        row(
+            "s",
+            "cycle sort: biggest → longest-ago → recent → most-used → least-used",
+        ),
         row("esc", "exit search / clear filter"),
         Line::raw(""),
         section("actions (owner-aware)"),
@@ -531,10 +547,7 @@ fn draw_confirm_modal(f: &mut Frame, c: &ConfirmPrompt) {
     }
     lines.push(Line::raw(""));
     lines.push(Line::from(vec![
-        Span::styled(
-            "  y / ⏎",
-            Style::default().fg(GOOD).bold(),
-        ),
+        Span::styled("  y / ⏎", Style::default().fg(GOOD).bold()),
         Span::styled(" confirm    ", Style::default().fg(MUTED)),
         Span::styled("n / esc", Style::default().fg(DIM).bold()),
         Span::styled(" cancel", Style::default().fg(MUTED)),
@@ -591,8 +604,10 @@ fn source_color(s: Source) -> Color {
         Source::Zerobrew => Color::LightMagenta,
         Source::Brew => Color::LightYellow,
         Source::AppStore => ACCENT,
-        Source::Nix => Color::LightBlue,
-        Source::Pkg => Color::LightRed,
+        Source::Npm => Color::LightRed,
+        Source::Pipx => Color::LightYellow,
+        Source::Uv => Color::LightMagenta,
+        Source::Cargo => Color::LightCyan,
         Source::Manual => DIM,
         _ => MUTED,
     }

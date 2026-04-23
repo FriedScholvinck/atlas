@@ -49,7 +49,7 @@ impl Lens {
     }
 }
 
-pub fn apply<'a>(lens: Lens, items: &'a [SoftwareItem]) -> Vec<&'a SoftwareItem> {
+pub fn apply(lens: Lens, items: &[SoftwareItem]) -> Vec<&SoftwareItem> {
     match lens {
         Lens::All => items.iter().collect(),
         Lens::Outdated => items.iter().filter(|i| i.is_outdated()).collect(),
@@ -60,10 +60,7 @@ pub fn apply<'a>(lens: Lens, items: &'a [SoftwareItem]) -> Vec<&'a SoftwareItem>
             .iter()
             .filter(|i| i.kind == Kind::App && i.arch == Arch::X86_64)
             .collect(),
-        Lens::Unsigned => items
-            .iter()
-            .filter(|i| i.signed == Some(false))
-            .collect(),
+        Lens::Unsigned => items.iter().filter(|i| i.signed == Some(false)).collect(),
     }
 }
 
@@ -87,7 +84,7 @@ fn duplicates(items: &[SoftwareItem]) -> Vec<&SoftwareItem> {
             out.extend(group);
         }
     }
-    out.sort_by(|a, b| normalize_name(&a.name).cmp(&normalize_name(&b.name)));
+    out.sort_by_key(|a| normalize_name(&a.name));
     out
 }
 
@@ -99,7 +96,7 @@ fn normalize_name(name: &str) -> String {
 
 fn bloat(items: &[SoftwareItem], top: usize) -> Vec<&SoftwareItem> {
     let mut scored: Vec<&SoftwareItem> = items.iter().filter(|i| i.size_bytes.is_some()).collect();
-    scored.sort_by(|a, b| b.size_bytes.cmp(&a.size_bytes));
+    scored.sort_by_key(|b| std::cmp::Reverse(b.size_bytes));
     scored.into_iter().take(top).collect()
 }
 
