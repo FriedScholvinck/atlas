@@ -29,9 +29,19 @@ impl ShellCmd {
 
 #[derive(Debug, Clone)]
 pub enum Action {
-    Delete { name: String, cmd: ShellCmd },
-    Update { name: String, cmd: ShellCmd },
-    UpdateAll { chain: Vec<ShellCmd> },
+    Delete {
+        id: String,
+        name: String,
+        cmd: ShellCmd,
+    },
+    Update {
+        id: String,
+        name: String,
+        cmd: ShellCmd,
+    },
+    UpdateAll {
+        chain: Vec<ShellCmd>,
+    },
 }
 
 impl Action {
@@ -80,14 +90,17 @@ impl Action {
 pub fn delete_for(item: &SoftwareItem, av: &Available) -> Option<Action> {
     match item.source {
         Source::Brew => av.brew.as_ref().map(|exe| Action::Delete {
+            id: item.id.clone(),
             name: item.name.clone(),
             cmd: brew_like(exe, "uninstall", &item.name, item.kind, "brew"),
         }),
         Source::Zerobrew => av.zb.as_ref().map(|exe| Action::Delete {
+            id: item.id.clone(),
             name: item.name.clone(),
             cmd: zb_cmd(exe, "uninstall", &item.name),
         }),
         Source::Manual => item.install_path.as_ref().map(|p| Action::Delete {
+            id: item.id.clone(),
             name: item.name.clone(),
             cmd: trash_cmd(p),
         }),
@@ -98,10 +111,12 @@ pub fn delete_for(item: &SoftwareItem, av: &Available) -> Option<Action> {
 pub fn update_for(item: &SoftwareItem, av: &Available) -> Option<Action> {
     match item.source {
         Source::Brew => av.brew.as_ref().map(|exe| Action::Update {
+            id: item.id.clone(),
             name: item.name.clone(),
             cmd: brew_like(exe, "upgrade", &item.name, item.kind, "brew"),
         }),
         Source::Zerobrew => av.zb.as_ref().map(|exe| Action::Update {
+            id: item.id.clone(),
             name: item.name.clone(),
             cmd: zb_cmd(exe, "upgrade", &item.name),
         }),

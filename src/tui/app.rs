@@ -90,7 +90,6 @@ const SOURCE_CYCLE: &[Option<Source>] = &[
     Some(Source::Npm),
     Some(Source::Pipx),
     Some(Source::Uv),
-    Some(Source::Cargo),
     Some(Source::Manual),
 ];
 
@@ -491,7 +490,30 @@ fn run_action<B: Backend + io::Write>(
     execute!(terminal.backend_mut(), EnterAlternateScreen)?;
     terminal.clear()?;
 
-    rescan(terminal, app)?;
+    if outcome.is_ok() {
+        match &action {
+            Action::Delete { id, .. } => {
+                app.snapshot.items.retain(|i| i.id != *id);
+                let _ = crate::index::save(&app.snapshot);
+            }
+            Action::Update { id, .. } => {
+                for item in &mut app.snapshot.items {
+                    if item.id == *id {
+                        item.status = crate::model::Status::Installed;
+                        if item.latest_version.is_some() {
+                            item.version = item.latest_version.take();
+                        }
+                    }
+                }
+                let _ = crate::index::save(&app.snapshot);
+            }
+            Action::UpdateAll { .. } => {
+                rescan(terminal, app)?;
+            }
+        }
+    }
+
+    app.clamp_cursor();
     app.status = Some(match outcome {
         Ok(()) => format!("{}  ·  ok", action.title()),
         Err(e) => format!("{}  ·  {}", action.title(), e),
