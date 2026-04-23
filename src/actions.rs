@@ -118,7 +118,7 @@ pub fn update_for(item: &SoftwareItem, av: &Available) -> Option<Action> {
         Source::Zerobrew => av.zb.as_ref().map(|exe| Action::Update {
             id: item.id.clone(),
             name: item.name.clone(),
-            cmd: zb_cmd(exe, "upgrade", &item.name),
+            cmd: zb_cmd(exe, "update", &item.name),
         }),
         _ => None,
     }
@@ -129,8 +129,8 @@ pub fn update_all(av: &Available) -> Option<Action> {
     if let Some(exe) = &av.zb {
         chain.push(ShellCmd::new(
             exe.clone(),
-            vec!["upgrade".into()],
-            "zb upgrade",
+            vec!["update".into()],
+            "zb update",
         ));
     }
     if let Some(exe) = &av.brew {

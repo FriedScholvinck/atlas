@@ -50,33 +50,6 @@ fn draw_title(f: &mut Frame, area: Rect, app: &App) {
         .iter()
         .filter(|i| i.is_outdated())
         .count();
-    let installers = {
-        let a = &app.snapshot.available;
-        let mut on = vec![];
-        if a.zb {
-            on.push("zb");
-        }
-        if a.brew {
-            on.push("brew");
-        }
-        if a.mas {
-            on.push("mas");
-        }
-        if a.npm {
-            on.push("npm");
-        }
-        if a.pipx {
-            on.push("pipx");
-        }
-        if a.uv {
-            on.push("uv");
-        }
-        if on.is_empty() {
-            "none".into()
-        } else {
-            on.join(" · ")
-        }
-    };
 
     let mut spans = vec![
         Span::styled("atlas", Style::default().fg(ACCENT).bold()),
@@ -86,15 +59,64 @@ fn draw_title(f: &mut Frame, area: Rect, app: &App) {
             Style::default().fg(DIM),
         ),
         Span::styled("  ·  ", Style::default().fg(MUTED)),
-        Span::styled(installers, Style::default().fg(DIM)),
     ];
-    if let Some(s) = app.source_filter {
-        spans.push(Span::styled("  ·  ", Style::default().fg(MUTED)));
-        spans.push(Span::styled(
-            format!("filter: {}", s.label()),
-            Style::default().fg(ACCENT).italic(),
-        ));
+
+    let a = &app.snapshot.available;
+    let mut available_sources = vec![];
+    if a.zb {
+        available_sources.push((Source::Zerobrew, "zb"));
     }
+    if a.brew {
+        available_sources.push((Source::Brew, "brew"));
+    }
+    if a.mas {
+        available_sources.push((Source::AppStore, "mas"));
+    }
+    if a.npm {
+        available_sources.push((Source::Npm, "npm"));
+    }
+    if a.pipx {
+        available_sources.push((Source::Pipx, "pipx"));
+    }
+    if a.uv {
+        available_sources.push((Source::Uv, "uv"));
+    }
+
+    if available_sources.is_empty() {
+        spans.push(Span::styled("none", Style::default().fg(DIM)));
+    } else {
+        for (i, (src, label)) in available_sources.into_iter().enumerate() {
+            if i > 0 {
+                spans.push(Span::styled(" · ", Style::default().fg(MUTED)));
+            }
+            if Some(src) == app.source_filter {
+                spans.push(Span::styled(
+                    format!(" {} ", label),
+                    Style::default()
+                        .fg(Color::Black)
+                        .bg(ACCENT)
+                        .add_modifier(Modifier::BOLD),
+                ));
+            } else {
+                spans.push(Span::styled(label, Style::default().fg(DIM)));
+            }
+        }
+    }
+
+    if let Some(s) = app.source_filter {
+        // If the filter is something not in the installers list (like manual)
+        if s == Source::Manual {
+            spans.push(Span::styled(" · ", Style::default().fg(MUTED)));
+            spans.push(Span::styled(
+                " manual ",
+                Style::default()
+                    .fg(Color::Black)
+                    .bg(ACCENT)
+                    .add_modifier(Modifier::BOLD),
+            ));
+        }
+    }
+
     if outdated > 0 {
         spans.push(Span::styled("  ·  ", Style::default().fg(MUTED)));
         spans.push(Span::styled(
