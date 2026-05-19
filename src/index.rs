@@ -23,6 +23,10 @@ pub struct AvailableSummary {
     pub npm: bool,
     pub pipx: bool,
     pub uv: bool,
+    #[serde(default)]
+    pub claude: bool,
+    #[serde(default)]
+    pub codex: bool,
 }
 
 impl From<&Available> for AvailableSummary {
@@ -34,6 +38,8 @@ impl From<&Available> for AvailableSummary {
             npm: a.npm.is_some(),
             pipx: a.pipx.is_some(),
             uv: a.uv.is_some(),
+            claude: a.claude_skills.is_some(),
+            codex: a.codex_skills.is_some(),
         }
     }
 }
@@ -88,6 +94,16 @@ pub fn scan_all(available: &Available) -> Result<Snapshot> {
             items.extend(uv_items);
         }
     }
+    if let Some(root) = &available.claude_skills {
+        if let Ok(skill_items) = scan::claude_skills::scan(root) {
+            items.extend(skill_items);
+        }
+    }
+    if let Some(root) = &available.codex_skills {
+        if let Ok(skill_items) = scan::codex_skills::scan(root) {
+            items.extend(skill_items);
+        }
+    }
 
     let merged = merge(items);
 
@@ -118,10 +134,12 @@ fn merge(items: Vec<SoftwareItem>) -> Vec<SoftwareItem> {
             .bundle_id
             .as_ref()
             .and_then(|b| by_bundle.get(b).copied())
+            .filter(|i| can_merge(&out[*i], &item))
             .or_else(|| {
                 item.install_path
                     .as_ref()
                     .and_then(|p| by_path.get(p).copied())
+                    .filter(|i| can_merge(&out[*i], &item))
             })
             .or_else(|| by_name.get(&(item.kind, item.name.clone())).copied());
 
@@ -149,6 +167,14 @@ fn merge(items: Vec<SoftwareItem>) -> Vec<SoftwareItem> {
     }
 
     out
+}
+
+fn can_merge(a: &SoftwareItem, b: &SoftwareItem) -> bool {
+    if a.kind == crate::model::Kind::Skill || b.kind == crate::model::Kind::Skill {
+        a.kind == b.kind
+    } else {
+        true
+    }
 }
 
 fn merge_into(dst: &mut SoftwareItem, src: &mut SoftwareItem) {
@@ -195,7 +221,9 @@ fn prefer_source(a: Source, b: Source) -> Source {
         Source::Uv => 5,
         Source::Cargo => 6,
         Source::Manual => 7,
-        _ => 8,
+        Source::ClaudeCode => 8,
+        Source::Codex => 9,
+        _ => 10,
     };
     if rank(a) <= rank(b) {
         a

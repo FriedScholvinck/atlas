@@ -99,11 +99,13 @@ pub fn delete_for(item: &SoftwareItem, av: &Available) -> Option<Action> {
             name: item.name.clone(),
             cmd: zb_cmd(exe, "uninstall", &item.name),
         }),
-        Source::Manual => item.install_path.as_ref().map(|p| Action::Delete {
-            id: item.id.clone(),
-            name: item.name.clone(),
-            cmd: trash_cmd(p),
-        }),
+        Source::Manual | Source::ClaudeCode | Source::Codex => {
+            item.install_path.as_ref().map(|p| Action::Delete {
+                id: item.id.clone(),
+                name: item.name.clone(),
+                cmd: trash_cmd(p),
+            })
+        }
         _ => None, // AppStore needs sudo; lang managers deferred.
     }
 }

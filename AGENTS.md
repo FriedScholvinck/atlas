@@ -38,6 +38,7 @@ Formula/         Homebrew tap
 - **Source preference is `zb > mas > brew > npm > pipx > uv > manual`.** Merge logic in `src/index.rs` relies on this ordering. Preserve it unless you genuinely intend to change attribution.
 - **Snapshot is in-memory `Vec<SoftwareItem>` + JSON on disk.** No SQLite, no migrations. If you find yourself reaching for a DB, stop and justify it.
 - **Actions are source-routed.** `brew uninstall`, `zb uninstall`, App Store has no CLI path, manual `.app` → Finder Trash via `osascript`. Never `rm -rf` an app bundle.
+- **Adding a new `Source` requires four touchpoints**: the `Source` enum + `label()` in `src/model.rs`, the `prefer_source()` rank in `src/index.rs`, the `Available` struct + summary in `src/probe.rs`, and the `parse_source` arm in `src/cli.rs`. Grep for `Source::Brew` to find them.
 - **CLI is strictly read-only** (`list` / `info` / `doctor`). Destructive verbs live in the TUI only, so scripted agents cannot uninstall.
 - **Columns in the TUI are fixed-width.** If you add a column, pad every row so alignment holds — see `pad_display` in `src/tui/ui.rs`.
 

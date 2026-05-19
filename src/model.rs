@@ -12,6 +12,7 @@ pub enum Kind {
     Service,
     Runtime,
     Manager,
+    Skill,
     Unknown,
 }
 
@@ -25,6 +26,7 @@ impl Kind {
             Kind::Service => "svc",
             Kind::Runtime => "rt",
             Kind::Manager => "mgr",
+            Kind::Skill => "skill",
             Kind::Unknown => "?",
         }
     }
@@ -43,6 +45,10 @@ pub enum Source {
     Uv,
     Gem,
     Go,
+    #[serde(rename = "claude")]
+    ClaudeCode,
+    #[serde(rename = "codex")]
+    Codex,
     Unknown,
 }
 
@@ -59,6 +65,8 @@ impl Source {
             Source::Uv => "uv",
             Source::Gem => "gem",
             Source::Go => "go",
+            Source::ClaudeCode => "claude",
+            Source::Codex => "codex",
             Source::Unknown => "?",
         }
     }

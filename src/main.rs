@@ -166,7 +166,7 @@ fn print_help() {
            atlas info <name|bundle-id> [--json]\n  \
            atlas doctor [--json]            summary counts & storage\n\n\
          lenses:  all, outdated, duplicates, bloat, stale, rosetta, unsigned\n\
-         sources: brew, zb, mas, manual, npm, cargo, pipx, uv\n\
+         sources: brew, zb, mas, manual, npm, cargo, pipx, uv, claude, codex\n\
          sort:    size, old, recent, frequent, rare, none\n",
         env!("CARGO_PKG_VERSION")
     );

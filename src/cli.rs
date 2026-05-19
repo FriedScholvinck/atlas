@@ -215,6 +215,12 @@ impl Report {
         if snap.available.uv {
             installers.push("uv".into());
         }
+        if snap.available.claude {
+            installers.push("claude".into());
+        }
+        if snap.available.codex {
+            installers.push("codex".into());
+        }
         Report {
             generated_at: snap.generated_at.to_rfc3339(),
             total: snap.items.len(),
@@ -284,6 +290,8 @@ pub fn parse_source(s: &str) -> Result<Source> {
         "cargo" => Source::Cargo,
         "pipx" => Source::Pipx,
         "uv" => Source::Uv,
+        "claude" | "claude-code" => Source::ClaudeCode,
+        "codex" => Source::Codex,
         "manual" | "app" => Source::Manual,
         other => bail!("unknown source: {other}"),
     })
