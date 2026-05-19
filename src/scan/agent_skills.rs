@@ -9,7 +9,10 @@ pub fn scan(root: &Path, source: Source) -> Result<Vec<SoftwareItem>> {
 
     for entry in fs::read_dir(root).with_context(|| format!("failed to read {}", root.display()))? {
         let Ok(entry) = entry else {
-            eprintln!("warning: failed to read skill entry under {}", root.display());
+            eprintln!(
+                "warning: failed to read skill entry under {}",
+                root.display()
+            );
             continue;
         };
         let path = entry.path();
@@ -30,7 +33,10 @@ pub fn scan(root: &Path, source: Source) -> Result<Vec<SoftwareItem>> {
 fn parse_skill_dir(path: &Path, source: Source) -> Result<Option<SoftwareItem>> {
     let manifest = path.join("SKILL.md");
     if !manifest.is_file() {
-        eprintln!("warning: skipping skill {}: missing SKILL.md", path.display());
+        eprintln!(
+            "warning: skipping skill {}: missing SKILL.md",
+            path.display()
+        );
         return Ok(None);
     }
 
