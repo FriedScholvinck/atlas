@@ -142,6 +142,8 @@ impl App {
             Some(Source::Pipx) => "pipx",
             Some(Source::Uv) => "uv",
             Some(Source::Cargo) => "cargo",
+            Some(Source::ClaudeCode) => "claude",
+            Some(Source::Codex) => "codex",
             Some(Source::Manual) => "manual",
             Some(_) => "other",
         }
@@ -176,6 +178,12 @@ impl App {
         }
         if a.uv {
             cycle.push(Some(Source::Uv));
+        }
+        if a.claude {
+            cycle.push(Some(Source::ClaudeCode));
+        }
+        if a.codex {
+            cycle.push(Some(Source::Codex));
         }
         cycle.push(Some(Source::Manual));
 

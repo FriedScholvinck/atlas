@@ -81,6 +81,12 @@ fn draw_title(f: &mut Frame, area: Rect, app: &App) {
     if a.uv {
         available_sources.push((Source::Uv, "uv"));
     }
+    if a.claude {
+        available_sources.push((Source::ClaudeCode, "claude"));
+    }
+    if a.codex {
+        available_sources.push((Source::Codex, "codex"));
+    }
 
     if available_sources.is_empty() {
         spans.push(Span::styled("none", Style::default().fg(DIM)));
@@ -511,7 +517,7 @@ fn draw_help_modal(f: &mut Frame) {
         Line::raw(""),
         section("filter & sort"),
         row("/ or f", "search name / bundle id"),
-        row("] [", "cycle installer (all → brew → zb → mas → manual)"),
+        row("] [", "cycle installer (all → available sources → manual)"),
         row(
             "s",
             "cycle sort: biggest → longest-ago → recent → most-used → least-used",
@@ -630,6 +636,8 @@ fn source_color(s: Source) -> Color {
         Source::Pipx => Color::LightYellow,
         Source::Uv => Color::LightMagenta,
         Source::Cargo => Color::LightCyan,
+        Source::ClaudeCode => Color::LightBlue,
+        Source::Codex => Color::LightGreen,
         Source::Manual => DIM,
         _ => MUTED,
     }

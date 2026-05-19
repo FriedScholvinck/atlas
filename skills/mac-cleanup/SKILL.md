@@ -122,8 +122,14 @@ The CLI is read-only by design. When the user decides to uninstall something, ge
 | `npm` | `npm uninstall -g <name>` |
 | `pipx` | `pipx uninstall <name>` |
 | `uv` | `uv tool uninstall <name>` |
+| `claude` | Move skill dir to Trash: `osascript -e 'tell application "Finder" to delete POSIX file "<install_path>"'` |
+| `codex` | Move skill dir to Trash: `osascript -e 'tell application "Finder" to delete POSIX file "<install_path>"'` |
 
 Always show the exact command and wait for the user to run it. Never chain uninstalls without confirmation. For manual `.app` bundles, prefer the Finder-trash route over `rm -rf` — reversible, and some apps leave LaunchAgents behind that need a separate cleanup.
+
+### Agent skills
+
+Atlas surfaces locally installed agent skills from `~/.claude/skills/*/SKILL.md` and `~/.codex/skills/*/SKILL.md` as `kind: skill` rows. Use `atlas list --source claude --json` or `atlas list --source codex --json` to inspect them; uninstall by moving the reported `install_path` to Finder Trash, the same route as `manual`.
 
 ## Good cleanup patterns
 

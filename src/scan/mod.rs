@@ -1,5 +1,8 @@
+mod agent_skills;
 pub mod apps;
 pub mod brew;
+pub mod claude_skills;
+pub mod codex_skills;
 pub mod mas;
 pub mod npm;
 pub mod pipx;
